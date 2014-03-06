@@ -11,7 +11,7 @@ type Note = (Int, Int) -- Drum part, intensity.
 
 open :: FilePath -> IO [(Integer, Note)]
 open filename = do
-    Cons t d tracks <- fromFile filename
+    Cons t _ tracks <- fromFile filename -- Lose: division.
     let notes = mapMaybe bodyToNote $ getMessages $ mergeTracks t tracks
     return $ toPairList $ mapTime fromElapsedTime notes
     where
