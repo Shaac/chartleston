@@ -12,3 +12,8 @@ join = mergeZeros (0, []) . (setZeros 0)
         mergeZeros a [] = [a]
         mergeZeros (a1,a2) ((0,x):xs) = mergeZeros (a1, x:a2) xs
         mergeZeros a ((x1,x2):xs) = a : (mergeZeros (x1,[x2]) xs)
+
+shiftFirst :: [(a, b)] -> [(a, b)]
+shiftFirst = uncurry zip . shift . unzip
+    where
+        shift (x, y) = (drop 1 $ cycle x, y)
