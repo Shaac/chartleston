@@ -13,7 +13,8 @@ join = mergeZeros (0, []) . (setZeros 0)
         mergeZeros (a1,a2) ((0,x):xs) = mergeZeros (a1, x:a2) xs
         mergeZeros a ((x1,x2):xs) = a : (mergeZeros (x1,[x2]) xs)
 
-shiftFirst :: [(a, b)] -> [(a, b)]
-shiftFirst = uncurry zip . shift . unzip
-    where
-        shift (x, y) = (drop 1 $ cycle x, y)
+shiftFst :: [(a, b)] -> [(a, b)]
+shiftFst = uncurry zip . (mapFst (drop 1 . cycle)) . unzip
+
+mapFst :: (a -> b) -> (a, c) -> (b, c)
+mapFst f (x, y) = (f x, y)
