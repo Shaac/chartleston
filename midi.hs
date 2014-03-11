@@ -1,5 +1,6 @@
 module Midi (open, Note) where
 
+import Control.Monad (liftM)
 import Sound.MIDI.File.Load (fromFile)
 import Sound.MIDI.File
 import Data.EventList.Relative.TimeBody (mapMaybe, mapTime, toPairList)
@@ -16,7 +17,7 @@ open filename = do
     return $ toPairList $ mapTime fromElapsedTime notes
     where
         -- Lose: meta events, system exclusive information, channel number.
-        getMessages = mapMaybe ((>>= return . messageBody) . maybeMIDIEvent)
+        getMessages = mapMaybe (liftM messageBody . maybeMIDIEvent)
 
 -- | Get note information (pitch and velocity) from a MIDI channel message.
 -- Lose: all channel messages other than NoteOn (Mode information, NoteOff…).
