@@ -9,7 +9,7 @@ equalise :: [Integer] -> [Integer]
 equalise [] = []
 equalise l = let (a, b) = split l in treat a ++ (equalise b)
     where
-        split (x:xs) = span ((< 0.2) . abs . (1 -) . (divide x)) xs
+        split (x:xs) = mapFst (x:) $ span ((< 0.2) . abs . (1 -) . (divide x)) xs
         treat x      = let s = length x in replicate s ((sum x) `div` (fromIntegral s))
 
 join :: [(Integer, Note)] -> [(Integer, [Note])]
