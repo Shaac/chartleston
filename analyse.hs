@@ -2,6 +2,16 @@ module Analyse where
 
 import Midi (Note)
 
+divide :: Integer -> Integer -> Double
+divide a b = (fromInteger a) / (fromInteger b)
+
+equalise :: [Integer] -> [Integer]
+equalise [] = []
+equalise l = let (a, b) = split l in treat a ++ (equalise b)
+    where
+        split (x:xs) = span ((< 0.2) . abs . (1 -) . (divide x)) xs
+        treat x      = let s = length x in replicate s ((sum x) `div` (fromIntegral s))
+
 join :: [(Integer, Note)] -> [(Integer, [Note])]
 join = mergeZeros (0, []) . (setZeros 0)
    where
