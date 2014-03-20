@@ -2,14 +2,12 @@ module Analyse where
 
 import Midi (Note)
 
-divide :: Integer -> Integer -> Double
-divide a b = (fromInteger a) / (fromInteger b)
-
 equalise :: [Integer] -> [Integer]
 equalise [] = []
 equalise l = let (a, b) = split l in treat a ++ (equalise b)
     where
-        split (x:xs) = mapFst (x:) $ span ((< 0.2) . abs . (1 -) . (divide x)) xs
+        split (x:xs) = mapFst (x:) $ span ((< 0.2) . (ratio x)) xs
+        ratio x y    = abs $ fromInteger y / (fromInteger x) - 1 :: Rational
         treat x      = let s = length x in replicate s ((sum x) `div` (fromIntegral s))
 
 join :: [(Integer, Note)] -> [(Integer, [Note])]
