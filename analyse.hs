@@ -6,6 +6,7 @@ equalise :: [Integer] -> [Integer]
 equalise [] = []
 equalise l = let (a, b) = split l in treat a ++ (equalise b)
     where
+        split []     = ([], []) -- Not a possible input, but avoid warnings.
         split (x:xs) = mapFst (x:) $ span ((< 0.2) . (ratio x)) xs
         ratio x y    = abs $ fromInteger y / (fromInteger x) - 1 :: Rational
         treat x      = let s = length x in replicate s ((sum x) `div` (fromIntegral s))
