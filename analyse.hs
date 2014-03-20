@@ -24,8 +24,10 @@ join = mergeZeros (0, []) . (setZeros 0)
     mergeZeros (time, note) ((0, x):xs) = mergeZeros (time, x : note) xs
     mergeZeros x ((x1, x2):xs) = x : (mergeZeros (x1, [x2]) xs)
 
+-- Shift the first values of the tuples, counterclokwise.
 shiftFst :: [(a, b)] -> [(a, b)]
 shiftFst = uncurry zip . (mapFst (drop 1 . cycle)) . unzip
 
+-- Apply a function to the first item of a tuple.
 mapFst :: (a -> b) -> (a, c) -> (b, c)
 mapFst f (x, y) = (f x, y)
