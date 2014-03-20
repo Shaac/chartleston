@@ -1,6 +1,10 @@
-module Analyse where
+module Analyse (analyse) where
 
--- | Equalise an integer list: close values next to each other are leveled.
+-- | Use all below functions.
+analyse :: [(Integer, a)] -> [(Integer, [a])]
+analyse = uncurry zip . (mapFst equalise) . unzip . shiftFst . join
+
+-- Equalise an integer list: close values next to each other are leveled.
 equalise :: [Integer] -> [Integer]
 equalise [] = []
 equalise xs = let (similar, rest) = cut xs in level similar ++ (equalise rest)
@@ -10,7 +14,7 @@ equalise xs = let (similar, rest) = cut xs in level similar ++ (equalise rest)
     ratio y x  = abs $ fromInteger x / (fromInteger y) - 1 :: Rational
     level l    = let s = length l in replicate s $ sum l `div` (fromIntegral s)
 
--- | Join notes that are close into simultaneous notes.
+-- Join notes that are close into simultaneous notes.
 join :: [(Integer, a)] -> [(Integer, [a])]
 join = mergeZeros (0, []) . (setZeros 0)
   where
