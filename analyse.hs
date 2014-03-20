@@ -1,5 +1,7 @@
 module Analyse (analyse) where
 
+import Data.List (group, sort)
+
 -- | Use all below functions.
 analyse :: [(Integer, a)] -> [(Integer, [a])]
 analyse = uncurry zip . (mapFst equalise) . unzip . shiftFst . join
@@ -27,6 +29,10 @@ join = mergeZeros (0, []) . (setZeros 0)
     mergeZeros x [] = [x]
     mergeZeros (time, note) ((0, x):xs) = mergeZeros (time, x : note) xs
     mergeZeros x ((x1, x2):xs) = x : (mergeZeros (x1, [x2]) xs)
+
+-- Return the element in a list with the most occurences.
+mostPresent :: Ord a => [a] -> a
+mostPresent = snd . maximum . (map (\x -> (length x, head x))) . group . sort
 
 -- Apply a function to the first item of a tuple.
 mapFst :: (a -> b) -> (a, c) -> (b, c)
