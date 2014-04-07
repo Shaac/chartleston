@@ -5,6 +5,7 @@ all: main
 clean:
 	rm -f *.o
 	rm -f *.hi
+	rm -f main
 
 main: $(SRC)
 	ghc --make -Wall $^
