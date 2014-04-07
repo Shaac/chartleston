@@ -1,6 +1,11 @@
 module Write where
 
-note :: Num a => String
+write :: (Num a, Eq a) => [(Integer, [(a, b)])] -> String
+write [] = ""
+write ((t, [(n, _)]):xs) = note n ++ (show t) ++ " " ++ (write xs)
+write ((t, l):xs) = "<" ++ (unwords $ map (note . fst) l) ++ ">" ++ (show t) ++ " " ++ (write xs)
+
+note :: (Num a, Eq a) => a -> String
 note 35 = "bda"   -- Bass drum 2
 note 36 = "bd"    -- Bass Drum 1
 note 37 = "ss"    -- Side Stick/Rimshot
@@ -48,3 +53,4 @@ note 78 = "cuim"  -- Mute Cuíca
 note 79 = "cuio"  -- Open Cuíca
 note 80 = "trim"  -- Mute Triangle
 note 81 = "trio"  -- Open Triangle
+note _  = fail "Unexisting note."
