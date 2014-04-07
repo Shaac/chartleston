@@ -9,10 +9,14 @@ write = (prefix ++) . (++ suffix) . aux
     end t xs = (show t) ++ " " ++ (aux xs)
 
 prefix :: String
-prefix = "\n\\version \"2.16.0\"\n\\drums {\n"
+prefix = unlines [
+  "\\version \"2.16.0\"",
+  "\\drums {",
+  "    \\override Staff.TimeSignature #'style = #'() % Display 4/4 signature.",
+  "    \\set Staff.beamExceptions = #'()"]
 
 suffix :: String
-suffix = "\n}\n"
+suffix = "\\bar \"|.\"\n}\n"
 
 note :: (Num a, Eq a) => a -> String
 note 35 = "bda"   -- Bass drum 2
