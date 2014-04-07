@@ -11,9 +11,23 @@ write = (prefix ++) . (++ suffix) . aux
 prefix :: String
 prefix = unlines [
   "\\version \"2.16.0\"",
+  "",
+  "#(define standard '(",
+  "    (splashcymbal   cross    #f  6)",
+  "    (hihat          cross    #f  5)",
+  "    (hightom        default  #f  4)",
+  "    (himidtom       default  #f  3)",
+  "    (lowmidtom      default  #f  2)",
+  "    (snare          default  #f  1)",
+  "    (lowtom         default  #f  0)",
+  "    (highfloortom   default  #f  -1)",
+  "    (lowfloortom    default  #f  -2)",
+  "    (bassdrum       default  #f  -3)))",
+  "",
   "\\drums {",
   "    \\override Staff.TimeSignature #'style = #'() % Display 4/4 signature.",
-  "    \\set Staff.beamExceptions = #'()"]
+  "    \\set Staff.beamExceptions = #'() % Beam quavers two by two.",
+  "    \\set DrumStaff.drumStyleTable = #(alist->hash-table standard)"]
 
 suffix :: String
 suffix = "\\bar \"|.\"\n}\n"
