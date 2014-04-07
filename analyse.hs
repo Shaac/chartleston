@@ -8,7 +8,7 @@ analyse = uncurry zip . (mapFst $ detect . equalise) . unzip . shiftFst . join
 
 -- Use a simple but crude tempo detection. To be used after a pre-treatmnent.
 detect :: [Integer] -> [Integer]
-detect xs = map (round . divide . fromInteger) xs
+detect xs = map (round . divide . fromInteger . (max 1)) xs
   where divide = (8 * (fromInteger $ mostPresent xs) /) :: Rational -> Rational
 
 -- Equalise an integer list: close values next to each other are leveled.
