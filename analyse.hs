@@ -4,7 +4,12 @@ import Data.List (group, sort)
 
 -- | Use all below functions.
 analyse :: [(Integer, a)] -> [(Integer, [a])]
-analyse = uncurry zip . (mapFst equalise) . unzip . shiftFst . join
+analyse = uncurry zip . (mapFst $ detect . equalise) . unzip . shiftFst . join
+
+-- Use a simple but crude tempo detection. To be used after a pre-treatmnent.
+detect :: [Integer] -> [Integer]
+detect xs = map (round . (/ (common / 8)) . fromIntegral) xs
+  where common = fromIntegral $ mostPresent xs
 
 -- Equalise an integer list: close values next to each other are leveled.
 equalise :: [Integer] -> [Integer]
