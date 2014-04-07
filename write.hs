@@ -1,9 +1,18 @@
 module Write where
 
 write :: (Num a, Eq a) => [(Integer, [(a, b)])] -> String
-write [] = ""
-write ((t, [(n, _)]):xs) = note n ++ (show t) ++ " " ++ (write xs)
-write ((t, l):xs) = "<" ++ (unwords $ map (note . fst) l) ++ ">" ++ (show t) ++ " " ++ (write xs)
+write = (prefix ++) . (++ suffix) . aux
+  where
+    aux [] = ""
+    aux ((t, [(n, _)]):xs) = note n ++ (end t xs)
+    aux ((t, l):xs) = '<' : (unwords $ map (note . fst) l) ++ ">" ++ (end t xs)
+    end t xs = (show t) ++ " " ++ (aux xs)
+
+prefix :: String
+prefix = "\n\\version \"2.16.0\"\n\\drums {\n"
+
+suffix :: String
+suffix = "\n}\n"
 
 note :: (Num a, Eq a) => a -> String
 note 35 = "bda"   -- Bass drum 2

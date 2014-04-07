@@ -8,4 +8,4 @@ main :: IO ()
 main = do
     args <- getArgs
     midi <- open $ args !! 0
-    print $ write $ analyse $ midi
+    putStr $ write $ analyse $ midi
