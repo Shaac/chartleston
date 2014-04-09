@@ -3,9 +3,11 @@ module Write where
 import Data.List (partition)
 
 write :: (Num a, Eq a) => [(Integer, [(a, b)])] -> String
-write = (prefix ++) . (++ suffix) . aux
+write x = prefix ++ (aux up) ++ "}\\\\{" ++ (aux down) ++ suffix
   where
+    (up, down) = voices x
     aux [] = ""
+    aux ((t, []):xs) = 'r' : (end t xs)
     aux ((t, [(n, _)]):xs) = note n ++ (end t xs)
     aux ((t, l):xs) = '<' : (unwords $ map (note . fst) l) ++ ">" ++ (end t xs)
     end t xs = (show t) ++ " " ++ (aux xs)
@@ -34,13 +36,15 @@ prefix = unlines [
   "    (lowfloortom    default  #f  -2)",
   "    (bassdrum       default  #f  -3)))",
   "",
-  "\\drums {",
+  "\\new DrumStaff <<",
   "    \\override Staff.TimeSignature #'style = #'() % Display 4/4 signature.",
   "    \\set Staff.beamExceptions = #'() % Beam quavers two by two.",
-  "    \\set DrumStaff.drumStyleTable = #(alist->hash-table standard)"]
+  "    \\set DrumStaff.drumStyleTable = #(alist->hash-table standard)",
+  "    \\drummode {",
+  "        << {"]
 
 suffix :: String
-suffix = "\\bar \"|.\"\n}\n"
+suffix = "\\bar \"|.\"\n}>>}>>\n"
 
 note :: (Num a, Eq a) => a -> String
 note 35 = "bda"   -- Bass drum 2
