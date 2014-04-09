@@ -18,7 +18,7 @@ voices x = (zip time xs, zip time ys)
   where
     (xs, ys)      = unzip $ map (partition (flip elem cymbals . fst)) notes
     (time, notes) = unzip x
-    cymbals       = [42, 46, 49, 51, 52, 53, 55, 57, 59] 
+    cymbals       = [42, 46, 49, 51, 52, 53, 55, 57, 59]
 
 prefix :: String
 prefix = unlines [
