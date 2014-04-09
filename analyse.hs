@@ -4,8 +4,10 @@ import Data.List (group, sort)
 
 -- | Use all below functions.
 analyse :: [(Integer, a)] -> [(Integer, [a])]
-analyse = uncurry zip . (mapFst treat) . unzip . join
-  where treat = lastNote . detect . equalise . (drop 1 . cycle)
+analyse = uncurry zip . (mapFst treat) . unzip . shiftFst . join
+  where
+    treat = lastNote . detect . equalise
+    shiftFst = uncurry zip . (mapFst (drop 1 . cycle)) . unzip
 
 -- Use a simple but crude tempo detection. To be used after a pre-treatmnent.
 detect :: [Integer] -> [Integer]
