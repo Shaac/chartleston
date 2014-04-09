@@ -4,7 +4,8 @@ import Data.List (group, sort)
 
 -- | Use all below functions.
 analyse :: [(Integer, a)] -> [(Integer, [a])]
-analyse = uncurry zip . (mapFst $ lastNote . detect . equalise) . unzip . shiftFst . join
+analyse = uncurry zip . (mapFst treat) . unzip . join
+  where treat = lastNote . detect . equalise . (drop 1 . cycle)
 
 -- Use a simple but crude tempo detection. To be used after a pre-treatmnent.
 detect :: [Integer] -> [Integer]
@@ -51,7 +52,3 @@ mostPresent = snd . maximum . (map (\x -> (length x, head x))) . group . sort
 -- Apply a function to the first item of a tuple.
 mapFst :: (a -> b) -> (a, c) -> (b, c)
 mapFst f (x, y) = (f x, y)
-
--- Shift the first values of the tuples, counterclokwise.
-shiftFst :: [(a, b)] -> [(a, b)]
-shiftFst = uncurry zip . (mapFst (drop 1 . cycle)) . unzip
