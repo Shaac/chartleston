@@ -2,7 +2,7 @@ module Write where
 
 import Data.List (partition)
 
-write :: (Num a, Eq a) => [(Integer, [(a, b)])] -> String
+write :: (Num a, Eq a, Eq b) => [(Integer, [(a, b)])] -> String
 write x = prefix ++ (aux up) ++ "}\\\\{" ++ (aux down) ++ suffix
   where
     (up, down) = voices x
@@ -12,13 +12,25 @@ write x = prefix ++ (aux up) ++ "}\\\\{" ++ (aux down) ++ suffix
     aux ((t, l):xs) = '<' : (unwords $ map (note . fst) l) ++ ">" ++ (end t xs)
     end t xs = (show t) ++ " " ++ (aux xs)
 
-voices :: (Num a, Eq a) =>
+voices :: (Num a, Eq a, Eq b) =>
   [(Integer, [(a, b)])] -> ([(Integer, [(a, b)])], [(Integer, [(a, b)])])
-voices x = (zip time xs, zip time ys)
+voices x = (removeRests $ zip time xs, removeRests $ zip time ys)
   where
     (xs, ys)      = unzip $ map (partition (flip elem cymbals . fst)) notes
     (time, notes) = unzip x
     cymbals       = [42, 46, 49, 51, 52, 53, 55, 57, 59]
+
+removeRests :: (Num a, Eq a, Eq b) =>
+    [(Integer, [(a, b)])] -> [(Integer, [(a, b)])]
+removeRests = convergence . (iterate aux)
+  where
+    convergence (x:y:xs)      = if x == y then x else convergence (y : xs)
+    convergence _             = fail "This can not occure."
+    aux ((t1, x):(t2, []):xs)
+      | t1 == t2              = (round $ (fromInteger t1 / 2 :: Double), x) : (aux xs)
+      | otherwise             = (t1, x) : (aux $ (t2, []) : xs)
+    aux (x:xs)                = x : (aux xs)
+    aux []                    = []
 
 prefix :: String
 prefix = unlines [
