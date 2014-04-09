@@ -1,6 +1,7 @@
 module Write where
 
-import Data.List (partition)
+import Data.List  (partition)
+import Data.Ratio (denominator)
 
 write :: (Num a, Eq a, Eq b) => [(Integer, [(a, b)])] -> String
 write x = prefix ++ (aux up) ++ "}\\\\{" ++ (aux down) ++ suffix
@@ -22,15 +23,19 @@ voices x = (removeRests $ zip time xs, removeRests $ zip time ys)
 
 removeRests :: (Num a, Eq a, Eq b) =>
     [(Integer, [(a, b)])] -> [(Integer, [(a, b)])]
-removeRests = convergence . (iterate aux)
+removeRests = convergence . (iterate (aux 0))
   where
-    convergence (x:y:xs)      = if x == y then x else convergence (y : xs)
-    convergence _             = fail "This can not occure."
-    aux ((t1, x):(t2, []):xs)
-      | t1 == t2              = (round $ (fromInteger t1 / 2 :: Double), x) : (aux xs)
-      | otherwise             = (t1, x) : (aux $ (t2, []) : xs)
-    aux (x:xs)                = x : (aux xs)
-    aux []                    = []
+    convergence (x:y:xs) = if x == y then x else convergence (y : xs)
+    convergence _        = fail "This can not occure."
+    aux e ((t1, x):(t2, []):xs)
+      | t1 == t2 && t1 <= denominator (add e t1) =
+                           (round $ (fromInteger t1 / 2 :: Double), x) :
+                           (aux (add e (t1 * 2))xs)
+      | otherwise        = (t1, x) : (aux (add e t1) $ (t2, []) : xs)
+    aux e ((t, x):xs)    = (t, x) : (aux (add e t) xs)
+    aux _ []             = []
+    add e x              = let y = e + ((1 / (fromInteger x)) :: Rational) in
+                           if y >= 1 then y - 1 else y
 
 prefix :: String
 prefix = unlines [
