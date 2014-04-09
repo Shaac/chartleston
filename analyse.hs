@@ -4,7 +4,7 @@ import Data.List (group, sort)
 
 -- | Use all below functions.
 analyse :: [(Integer, a)] -> [(Integer, [a])]
-analyse = uncurry zip . (mapFst $ detect . equalise) . unzip . shiftFst . join
+analyse = uncurry zip . (mapFst $ lastNote . detect . equalise) . unzip . shiftFst . join
 
 -- Use a simple but crude tempo detection. To be used after a pre-treatmnent.
 detect :: [Integer] -> [Integer]
@@ -34,6 +34,15 @@ join = mergeZeros (0, []) . (setZeros 0)
     mergeZeros x [] = [x]
     mergeZeros (time, note) ((0, x):xs) = mergeZeros (time, x : note) xs
     mergeZeros x ((x1, x2):xs) = x : (mergeZeros (x1, [x2]) xs)
+
+-- Give a duration to the last note, so that it last until the end of a mesure.
+lastNote :: [Integer] -> [Integer]
+lastNote = aux []
+  where
+    aux _   []     = fail "There is no data."
+    aux acc [_]    = [round $ max 1 $ 1 / (if dec == 0 then 1 else dec)]
+      where dec = snd (properFraction (sum acc) :: (Integer, Rational))
+    aux acc (x:xs) = x : (aux ((1 / (fromInteger x)):acc) xs)
 
 -- Return the element in a list with the most occurences.
 mostPresent :: Ord a => [a] -> a
