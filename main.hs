@@ -8,7 +8,7 @@ main :: IO ()
 main = do
     args <- getArgs
     midi <- open $ args !! 0
-    writeFile (arg args "o") $ write $ analyse $ midi
+    writeFile (output args) $ write $ analyse $ midi
 
 -- Read parameter from command line arguments.
 arg :: [String] -> String -> String
@@ -17,3 +17,13 @@ arg [_]      _   = ""
 arg (x:xs)   s
   | x == '-' : s = head xs
   | otherwise    = arg xs s
+
+-- Get the output filename.
+output :: [String] -> String
+output args = if param /= "" then param else ly "" (args !! 0)
+  where
+    param   = arg args "o"
+    ly acc ".midi"  = acc ++ ".ly"
+    ly acc []       = acc ++ ".ly"
+    ly _   ('/':xs) = ly "" xs
+    ly acc (x:xs)   = ly (acc ++ [x]) xs
