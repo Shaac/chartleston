@@ -16,7 +16,7 @@ open :: FilePath -> IO [(Integer, Note)]
 open filename = do
   -- Read file.
   Cons t _ tracks <- fromFile filename -- Lose: division.
-  -- Parse the MIDI files to get the notes.
+  -- Parse the MIDI files to get the notes.
   let notes = mapMaybe bodyToNote $ getMessages $ mergeTracks t tracks
   -- Retun the pairs time, note.
   return $ toPairList $ mapTime fromElapsedTime notes

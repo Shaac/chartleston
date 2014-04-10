@@ -65,7 +65,7 @@ prefix = unlines [
   "        << {"]
 
 -- The end of the lilypond file.
-suffix :: String
+suffix :: String
 suffix = "\\bar \"|.\"\n}>>}>>\n"
 
 -- Convert a MIDI instrument (number) to its Lilypond value.
