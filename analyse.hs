@@ -9,12 +9,15 @@ analyse = uncurry zip . (mapFst treat) . unzip . shiftFst . join
     treat = lastNote . detect . equalise
     shiftFst = uncurry zip . (mapFst (drop 1 . cycle)) . unzip
 
+-- Get closest power of 2.
+closest :: Double -> Integer
+closest  = (2 ^) . (max 0 . round . (/ log 2) . log :: Double -> Integer)
+
 -- Use a simple but crude tempo detection. To be used after a pre-treatmnent.
 detect :: [Integer] -> [Integer]
-detect xs = map ((2 ^) . closest . divide . fromInteger . (max 1)) xs
+detect xs = map (closest . divide . fromInteger . (max 1)) xs
   where
-    closest  = max 0 . round . (/ log 2) . log     :: Double -> Integer
-    divide   = (8 * (fromInteger $ majority xs) /) :: Double -> Double
+    divide   = (8 * (fromInteger $ majority xs) /)
     majority = snd . maximum . (map (\x -> (length x, head x))) . group . sort
 
 -- Equalise an integer list: close values next to each other are leveled.
