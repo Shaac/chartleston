@@ -11,9 +11,10 @@ analyse = uncurry zip . (mapFst treat) . unzip . shiftFst . join
 
 -- Use a simple but crude tempo detection. To be used after a pre-treatmnent.
 detect :: [Integer] -> [Integer]
-detect xs = map (round . divide . fromInteger . (max 1)) xs
+detect xs = map ((2 ^) . closest . divide . fromInteger . (max 1)) xs
   where
-    divide   = (8 * (fromInteger $ majority xs) /) :: Rational -> Rational
+    closest  = round . (/ log 2) . log             :: Double -> Integer
+    divide   = (8 * (fromInteger $ majority xs) /) :: Double -> Double
     majority = snd . maximum . (map (\x -> (length x, head x))) . group . sort
 
 -- Equalise an integer list: close values next to each other are leveled.
