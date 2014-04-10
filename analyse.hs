@@ -43,12 +43,12 @@ join = mergeZeros (0, []) . (setZeros 0)
 
 -- Give a duration to the last note, so that it last until the end of a mesure.
 lastNote :: [Integer] -> [Integer]
-lastNote = aux []
+lastNote = aux 0
   where
     aux _   []     = fail "There is no data."
-    aux acc [_]    = [round $ max 1 $ 1 / (if dec == 0 then 1 else dec)]
-      where dec = snd (properFraction (sum acc) :: (Integer, Rational))
-    aux acc (x:xs) = x : (aux ((1 / (fromInteger x)):acc) xs)
+    aux acc [_]    = [round $ 1 / (1 - dec)]
+      where dec = snd (properFraction acc :: (Integer, Rational))
+    aux acc (x:xs) = x : (aux (1 / (fromInteger x) + acc) xs)
 
 -- Apply a function to the first item of a tuple.
 mapFst :: (a -> b) -> (a, c) -> (b, c)
