@@ -59,14 +59,20 @@ prefix = unlines [
   "",
   "\\new DrumStaff <<",
   "    \\override Staff.TimeSignature #'style = #'() % Display 4/4 signature.",
-  "    \\set Staff.beamExceptions = #'() % Beam quavers two by two.",
+  "    \\set Staff.beamExceptions = #'()             " ++ 
+    "% Beam quavers two by two.",
   "    \\set DrumStaff.drumStyleTable = #(alist->hash-table standard)",
   "    \\drummode {",
   "        << {"]
 
 -- The end of the lilypond file.
 suffix :: String
-suffix = "\\bar \"|.\"\n}>>}>>\n"
+suffix = unlines [
+  "\\bar \"|.\"",
+  "        } >>",
+  "    }",
+  ">>",
+  "% vim:filetype=lilypond"]
 
 -- Convert a MIDI instrument (number) to its Lilypond value.
 note :: (Num a, Eq a) => a -> String
