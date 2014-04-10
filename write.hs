@@ -21,21 +21,21 @@ voices x = (removeRests $ zip time xs, removeRests $ zip time ys)
     (time, notes) = unzip x
     cymbals       = [42, 46, 49, 51, 52, 53, 55, 57, 59]
 
-removeRests :: (Num a, Eq a, Eq b) =>
-    [(Integer, [(a, b)])] -> [(Integer, [(a, b)])]
+removeRests :: (Eq a) => [(Integer, [a])] -> [(Integer, [a])]
 removeRests = convergence . (iterate (aux 0))
   where
     convergence (x:y:xs) = if x == y then x else convergence (y : xs)
     convergence _        = fail "This can not occure."
     aux e ((t1, x):(t2, []):xs)
-      | t1 == t2 && t1 <= denominator (add e t1) =
+      | t1 == t2 && ok t1 e =
                            (round $ (fromInteger t1 / 2 :: Double), x) :
-                           (aux (add e (t1 * 2))xs)
+                           (aux (add (add e t1) t2) xs)
       | otherwise        = (t1, x) : (aux (add e t1) $ (t2, []) : xs)
     aux e ((t, x):xs)    = (t, x) : (aux (add e t) xs)
     aux _ []             = []
     add e x              = let y = e + ((1 / (fromInteger x)) :: Rational) in
                            if y >= 1 then y - 1 else y
+    ok t e               = if t > denominator e then True else t <= denominator (add e t)
 
 prefix :: String
 prefix = unlines [
