@@ -12,7 +12,9 @@ analyse = uncurry zip . (mapFst treat) . unzip . shiftFst . join
 -- Use a simple but crude tempo detection. To be used after a pre-treatmnent.
 detect :: [Integer] -> [Integer]
 detect xs = map (round . divide . fromInteger . (max 1)) xs
-  where divide = (8 * (fromInteger $ mostPresent xs) /) :: Rational -> Rational
+  where
+    divide   = (8 * (fromInteger $ majority xs) /) :: Rational -> Rational
+    majority = snd . maximum . (map (\x -> (length x, head x))) . group . sort
 
 -- Equalise an integer list: close values next to each other are leveled.
 equalise :: [Integer] -> [Integer]
@@ -46,10 +48,6 @@ lastNote = aux []
     aux acc [_]    = [round $ max 1 $ 1 / (if dec == 0 then 1 else dec)]
       where dec = snd (properFraction (sum acc) :: (Integer, Rational))
     aux acc (x:xs) = x : (aux ((1 / (fromInteger x)):acc) xs)
-
--- Return the element in a list with the most occurences.
-mostPresent :: Ord a => [a] -> a
-mostPresent = snd . maximum . (map (\x -> (length x, head x))) . group . sort
 
 -- Apply a function to the first item of a tuple.
 mapFst :: (a -> b) -> (a, c) -> (b, c)
