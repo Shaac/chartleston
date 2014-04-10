@@ -13,7 +13,7 @@ analyse = uncurry zip . (mapFst treat) . unzip . shiftFst . join
 detect :: [Integer] -> [Integer]
 detect xs = map ((2 ^) . closest . divide . fromInteger . (max 1)) xs
   where
-    closest  = round . (/ log 2) . log             :: Double -> Integer
+    closest  = max 0 . round . (/ log 2) . log     :: Double -> Integer
     divide   = (8 * (fromInteger $ majority xs) /) :: Double -> Double
     majority = snd . maximum . (map (\x -> (length x, head x))) . group . sort
 
