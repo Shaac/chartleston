@@ -1,3 +1,4 @@
+import Data.Char          (toUpper)
 import System.Environment (getArgs)
 
 import Analyse (analyse)
@@ -23,7 +24,9 @@ output :: [String] -> String
 output args = if param /= "" then param else ly "" (args !! 0)
   where
     param   = arg args "o"
-    ly acc ".midi"  = acc ++ ".ly"
     ly acc []       = acc ++ ".ly"
     ly _   ('/':xs) = ly "" xs
-    ly acc (x:xs)   = ly (acc ++ [x]) xs
+    ly acc (x:xs)
+      | x == '.' && map toUpper xs == "MID"  = acc ++ ".ly"
+      | x == '.' && map toUpper xs == "MIDI" = acc ++ ".ly"
+      | otherwise                            = ly (acc ++ [x]) xs
