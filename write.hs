@@ -38,6 +38,7 @@ removeRests = convergence . (iterate (aux 0))
     aux _ []             = []
     add e x              = let y = e + ((1 / (fromInteger x)) :: Rational) in
                            if y >= 1 then y - 1 else y
+    ok 1 _ = False
     ok t e = if t > denominator e then True else t <= denominator (add e t)
 
 -- The beginning of the lilypond file.
