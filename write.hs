@@ -1,8 +1,9 @@
-module Write where
+module Write (write) where
 
 import Data.List  (partition)
 import Data.Ratio (denominator)
 
+-- | Write the music in Lilypond format.
 write :: (Num a, Eq a, Eq b) => [(Integer, [(a, b)])] -> String
 write x = prefix ++ (aux up) ++ "}\\\\{" ++ (aux down) ++ suffix
   where
@@ -13,6 +14,7 @@ write x = prefix ++ (aux up) ++ "}\\\\{" ++ (aux down) ++ suffix
     aux ((t, l):xs) = '<' : (unwords $ map (note . fst) l) ++ ">" ++ (end t xs)
     end t xs = (show t) ++ " " ++ (aux xs)
 
+-- Separate the notes in two voices. The cymbals are up, and the rest down.
 voices :: (Num a, Eq a, Eq b) =>
   [(Integer, [(a, b)])] -> ([(Integer, [(a, b)])], [(Integer, [(a, b)])])
 voices x = (removeRests $ zip time xs, removeRests $ zip time ys)
@@ -21,6 +23,7 @@ voices x = (removeRests $ zip time xs, removeRests $ zip time ys)
     (time, notes) = unzip x
     cymbals       = [42, 46, 49, 51, 52, 53, 55, 57, 59]
 
+-- Remove the rests on a voices by making previous notes longer.
 removeRests :: (Eq a) => [(Integer, [a])] -> [(Integer, [a])]
 removeRests = convergence . (iterate (aux 0))
   where
@@ -35,8 +38,9 @@ removeRests = convergence . (iterate (aux 0))
     aux _ []             = []
     add e x              = let y = e + ((1 / (fromInteger x)) :: Rational) in
                            if y >= 1 then y - 1 else y
-    ok t e               = if t > denominator e then True else t <= denominator (add e t)
+    ok t e = if t > denominator e then True else t <= denominator (add e t)
 
+-- The beginning of the lilypond file.
 prefix :: String
 prefix = unlines [
   "\\version \"2.16.0\"",
@@ -60,9 +64,11 @@ prefix = unlines [
   "    \\drummode {",
   "        << {"]
 
+-- The end of the lilypond file.
 suffix :: String
 suffix = "\\bar \"|.\"\n}>>}>>\n"
 
+-- Convert a MIDI instrument (number) to its Lilypond value.
 note :: (Num a, Eq a) => a -> String
 note 35 = "bda"   -- Bass drum 2
 note 36 = "bd"    -- Bass Drum 1
