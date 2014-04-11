@@ -4,15 +4,18 @@ import Data.List  (partition)
 import Data.Ratio (denominator)
 
 -- | Write the music in Lilypond format.
-write :: (Num a, Eq a, Eq b) => [(Integer, [(a, b)])] -> String
+write :: (Num a, Eq a, Ord b, Num b, Eq b) => [(Integer, [(a, b)])] -> String
 write x = prefix ++ (aux up) ++ "}\\\\{" ++ (aux down) ++ suffix
   where
     (up, down) = voices x
     aux [] = ""
-    aux ((t, []):xs) = 'r' : (end t xs)
-    aux ((t, [(n, _)]):xs) = note n ++ (end t xs)
-    aux ((t, l):xs) = '<' : (unwords $ map (note . fst) l) ++ ">" ++ (end t xs)
-    end t xs = (show t) ++ " " ++ (aux xs)
+    aux ((t, [ ]):xs) = 'r' : (show t ++ " " ++ (aux xs))
+    aux ((t, [n]):xs) = note' t n ++ " " ++ (aux xs)
+    aux ((t, l):xs)   = '<' : (unwords $ map (note' t) l) ++ "> " ++ (aux xs)
+    note' t (n, v)
+      | v < 50        = "\\parenthesize " ++ (note n) ++ (show t)
+      | v == 127      = (note n) ++ (show t) ++ "->"
+      | otherwise     = note n ++ (show t)
 
 -- Separate the notes in two voices. The cymbals are up, and the rest down.
 voices :: (Num a, Eq a, Eq b) =>
