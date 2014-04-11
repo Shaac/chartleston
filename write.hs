@@ -60,7 +60,7 @@ prefix = unlines [
   "",
   "\\new DrumStaff <<",
   "    \\override Staff.TimeSignature #'style = #'() % Display 4/4 signature.",
-  "    \\set Staff.beamExceptions = #'()             " ++ 
+  "    \\set Staff.beamExceptions = #'()             " ++
     "% Beam quavers two by two.",
   "    \\set DrumStaff.drumStyleTable = #(alist->hash-table standard)",
   "    \\drummode {",
