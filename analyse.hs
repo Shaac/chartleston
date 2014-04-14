@@ -20,12 +20,12 @@ detect xs = map (closest . (* fromInteger len) . (m /) . (max 1) . fromRational)
 
 -- Equalise an integer list: close values next to each other are leveled.
 equalise :: (Fractional a, Ord a) => [a] -> [a]
-equalise [] = []
-equalise xs = let (similar, rest) = cut xs in level similar ++ (equalise rest)
+equalise []  = []
+equalise [x] = [x]
+equalise xs  = let (similar, rest) = cut xs in level similar ++ (equalise rest)
   where
-    cut []     = ([], []) -- Not a possible input, but avoid warnings.
-    cut (y:ys) = mapFst (y :) $ span ((< 0.2) . abs . (1 -) . (/ y)) ys
-    level l    = let s = length l in replicate s $ sum l / (fromIntegral s)
+    cut l   = span ((< 0.2) . abs . (1 -) . (/ (head l))) l
+    level l = let s = length l in replicate s $ sum l / (fromIntegral s)
 
 -- Join notes that are close into simultaneous notes.
 join :: (Fractional a, Ord a) => [(a, b)] -> [(a, [b])]
