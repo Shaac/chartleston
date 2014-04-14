@@ -3,7 +3,7 @@ module Midi (open, Note) where
 import Data.EventList.Relative.TimeBody (mapMaybe, mapTime, toPairList)
 import Control.Monad                    (liftM)
 
-import Sound.MIDI.File
+import Sound.MIDI.File                  (fromElapsedTime, mergeTracks, T(Cons))
 import Sound.MIDI.File.Load             (fromFile)
 import Sound.MIDI.File.Event            (maybeMIDIEvent)
 import Sound.MIDI.Message.Channel       (Body(Voice), messageBody)
