@@ -24,8 +24,7 @@ equalise [] = []
 equalise xs = let (similar, rest) = cut xs in level similar ++ (equalise rest)
   where
     cut []     = ([], []) -- Not a possible input, but avoid warnings.
-    cut (y:ys) = mapFst (y:) $ span ((< 0.2) . (ratio y)) ys
-    ratio y x  = abs $ x / y - 1
+    cut (y:ys) = mapFst (y :) $ span ((< 0.2) . abs . (1 -) . (/ y)) ys
     level l    = let s = length l in replicate s $ sum l / (fromIntegral s)
 
 -- Join notes that are close into simultaneous notes.
