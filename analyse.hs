@@ -3,39 +3,39 @@ module Analyse (analyse) where
 import Data.List (group, sort)
 
 -- | Use all below functions.
-analyse :: [(Integer, a)] -> [(Integer, [a])]
+analyse :: [(Rational, a)] -> [(Integer, [a])]
 analyse = uncurry zip . (mapFst treat) . unzip . shiftFst . join
   where
     treat = lastNote . detect . equalise
     shiftFst = uncurry zip . (mapFst (drop 1 . cycle)) . unzip
 
 -- Use a simple but crude tempo detection. To be used after a pre-treatmnent.
-detect :: [Integer] -> [Integer]
-detect xs = map (closest . divide . fromInteger . (max 1)) xs
+detect :: [Rational] -> [Integer]
+detect xs = map (closest . (* fromInteger len) . (m /) . (max 1) . fromRational) xs
   where
-    divide   = (fromInteger len * (fromInteger $ majority xs) /)
+    m        = fromRational $ majority xs :: Double
     majority = snd . maximum . (map (\x -> (length x, head x))) . group . sort
-    len      = closest $ 1600 / (fromInteger (majority xs))
+    len      = closest $ 6 / m
     closest  = (2 ^) . (max 0 . round . (/ log 2) . log :: Double -> Integer)
 
 -- Equalise an integer list: close values next to each other are leveled.
-equalise :: [Integer] -> [Integer]
+equalise :: (Fractional a, Ord a) => [a] -> [a]
 equalise [] = []
 equalise xs = let (similar, rest) = cut xs in level similar ++ (equalise rest)
   where
     cut []     = ([], []) -- Not a possible input, but avoid warnings.
     cut (y:ys) = mapFst (y:) $ span ((< 0.2) . (ratio y)) ys
-    ratio y x  = abs $ fromInteger x / (fromInteger y) - 1 :: Rational
-    level l    = let s = length l in replicate s $ sum l `div` (fromIntegral s)
+    ratio y x  = abs $ x / y - 1
+    level l    = let s = length l in replicate s $ sum l / (fromIntegral s)
 
 -- Join notes that are close into simultaneous notes.
-join :: [(Integer, a)] -> [(Integer, [a])]
+join :: (Fractional a, Ord a) => [(a, b)] -> [(a, [b])]
 join = mergeZeros (0, []) . (setZeros 0)
   where
     -- Set close to zero numbers to zero, and add that time to next note.
     setZeros _ []   = []
     setZeros t ((time, note):xs)
-      | time < 20 = (0, note) : (setZeros (time + t) xs)
+      | time < 0.05 = (0, note) : (setZeros (time + t) xs)
       | otherwise = (time + t, note) : (setZeros 0 xs)
     -- Merge notes with a time of zero with the previous one.
     mergeZeros x [] = [x]
