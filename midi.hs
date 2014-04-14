@@ -1,12 +1,13 @@
 module Midi (open, Note) where
 
 import Data.EventList.Relative.TimeBody (mapMaybe, mapTime, toPairList)
-import Control.Monad                    (liftM)
+import Control.Monad                    (liftM, mfilter)
 
 import Sound.MIDI.File                  (fromElapsedTime, mergeTracks, T(Cons))
 import Sound.MIDI.File.Load             (fromFile)
 import Sound.MIDI.File.Event            (maybeMIDIEvent)
-import Sound.MIDI.Message.Channel       (Body(Voice), messageBody)
+import Sound.MIDI.Message.Channel       (Body(Voice), fromChannel,
+                                         messageBody, messageChannel)
 import Sound.MIDI.Message.Channel.Voice (fromPitch, fromVelocity, T(NoteOn))
 
 type Note = (Int, Int) -- Drum part, intensity.
@@ -21,8 +22,9 @@ open filename = do
   -- Retun the pairs time, note.
   return $ toPairList $ mapTime fromElapsedTime notes
   where
-    -- Lose: meta events, system exclusive information, channel number.
-    getMessages = mapMaybe (liftM messageBody . maybeMIDIEvent)
+    -- Lose: meta events, system exclusive information.
+    getMessages  = mapMaybe $ liftM messageBody . isPercussion . maybeMIDIEvent
+    isPercussion = mfilter $ (== 9) . fromChannel . messageChannel
 
 -- | Get note information (pitch and velocity) from a MIDI channel message.
 -- Lose: all channel messages other than NoteOn (Mode information, NoteOff…).
