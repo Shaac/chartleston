@@ -17,17 +17,18 @@ type Note = (Int, Int) -- Drum part, intensity.
 open :: FilePath -> IO [(Rational, Note)]
 open filename = do
   -- Read file.
-  Cons t division tracks <- fromFile filename
+  Cons typ division tracks <- fromFile filename
+  let track = secondsFromTicks division $ mergeTracks typ tracks
   -- Parse the MIDI files to get the notes.
-  let notes = mapMaybe bodyToNote $ getMessages $ secondsFromTicks division $ mergeTracks t tracks
-  -- Return the pairs time, note.
+  let notes = mapMaybe bodyToNote $ getMessages track
+  -- Return the pairs (time in seconds, note).
   return $ toPairList $ mapTime toNumber notes
   where
     -- Lose: meta events, system exclusive information.
     getMessages  = mapMaybe $ liftM messageBody . isPercussion . maybeMIDIEvent
     isPercussion = mfilter $ (== 9) . fromChannel . messageChannel
 
--- | Get note information (pitch and velocity) from a MIDI channel message.
+-- Get note information (pitch and velocity) from a MIDI channel message.
 -- Lose: all channel messages other than NoteOn (Mode information, NoteOff…).
 bodyToNote :: Body -> Maybe Note
 bodyToNote (Voice (NoteOn p v)) = Just (fromPitch p, fromVelocity v)
