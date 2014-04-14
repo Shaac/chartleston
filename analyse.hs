@@ -4,14 +4,13 @@ import Data.List (group, sort)
 
 -- | Use all below functions.
 analyse :: [(Rational, a)] -> [(Integer, [a])]
-analyse = uncurry zip . (mapFst treat) . unzip . shiftFst . join
+analyse = uncurry zip . (mapFst treat) . unzip . join
   where
-    treat = lastNote . detect . equalise
-    shiftFst = uncurry zip . (mapFst (drop 1 . cycle)) . unzip
+    treat = lastNote . detect . equalise . (drop 1)
 
 -- Use a simple but crude tempo detection. To be used after a pre-treatmnent.
 detect :: [Rational] -> [Integer]
-detect xs = map (closest . (* fromInteger len) . (m /) . (max 0.01) . fromRational) xs
+detect xs = map (closest . (* fromInteger len) . (m /) . fromRational) xs
   where
     m        = fromRational $ majority xs :: Double
     majority = snd . maximum . (map (\x -> (length x, head x))) . group . sort
@@ -21,7 +20,6 @@ detect xs = map (closest . (* fromInteger len) . (m /) . (max 0.01) . fromRation
 -- Equalise an integer list: close values next to each other are leveled.
 equalise :: (Fractional a, Ord a) => [a] -> [a]
 equalise []  = []
-equalise [x] = [x]
 equalise xs  = let (similar, rest) = cut xs in level similar ++ (equalise rest)
   where
     cut l   = span ((< 0.2) . abs . (1 -) . (/ (head l))) l
@@ -45,8 +43,7 @@ join = mergeZeros (0, []) . (setZeros 0)
 lastNote :: [Integer] -> [Integer]
 lastNote = aux 0
   where
-    aux _   []     = fail "There is no data."
-    aux acc [_]    = [round $ 1 / (1 - dec)]
+    aux acc []    = [round $ 1 / (1 - dec)]
       where dec = snd (properFraction acc :: (Integer, Rational))
     aux acc (x:xs) = x : (aux (1 / (fromInteger x) + acc) xs)
 
