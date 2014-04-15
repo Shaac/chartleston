@@ -16,7 +16,7 @@ detect xs = map (closest . (* fromInteger len) . (m /)) xs
     majority = snd . maximum . (map (\x -> (length x, head x))) . group . sort
     len      = closest $ 3 / m
     closest x
-      | x <= 2    = round x
+      | x <= 2    = max 1 $ round x
       | otherwise = 2 * (closest (x / 2))
 
 
