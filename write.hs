@@ -11,7 +11,7 @@ write x = prefix ++ (aux up) ++ "}\\\\{" ++ (aux down) ++ suffix
     aux [] = ""
     aux ((t, [ ]):xs) = 'r' : (show t ++ " " ++ (aux xs))
     aux ((t, [n]):xs) = note' t n ++ " " ++ (aux xs)
-    aux ((t, l):xs)   = '<' : (unwords $ map (note' t) l) ++ "> " ++ (aux xs)
+    aux ((t, l):xs)   = '<' : (unwords $ map (note . fst) l) ++ ">" ++ (show t) ++ " " ++ (aux xs)
     note' t (n, v)
       | v < 50        = "\\parenthesize " ++ (note n) ++ (show t)
       | v == 127      = (note n) ++ (show t) ++ "->"
