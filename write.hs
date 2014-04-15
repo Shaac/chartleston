@@ -22,9 +22,12 @@ voices :: (Num a, Eq a, Eq b) =>
   [(Integer, [(a, b)])] -> ([(Integer, [(a, b)])], [(Integer, [(a, b)])])
 voices x = (removeRests $ zip time xs, removeRests $ zip time ys)
   where
-    (xs, ys)      = unzip $ map (partition (flip elem cymbals . fst)) notes
+    (xs', ys')    = unzip $ map (partition (flip elem cymbals . fst)) notes
+    (xs, ys)      = if ys' /= notes then (xs', ys') else
+                    unzip $ map (partition (flip elem toms . fst)) notes
     (time, notes) = unzip x
     cymbals       = [42, 46, 49, 51, 52, 53, 55, 57, 59]
+    toms          = [37, 38, 40, 41, 43, 45, 47, 48, 50]
 
 -- Remove the rests on a voices by making previous notes longer.
 removeRests :: (Eq a) => [(Integer, [a])] -> [(Integer, [a])]
