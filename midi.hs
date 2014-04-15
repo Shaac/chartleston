@@ -4,7 +4,8 @@ import Data.EventList.Relative.TimeBody (mapMaybe, mapTime, toPairList)
 import Control.Monad                    (liftM, mfilter)
 import Numeric.NonNegative.Wrapper      (toNumber)
 
-import Sound.MIDI.File                  (mergeTracks, secondsFromTicks,T(Cons))
+import Sound.MIDI.File                  (explicitNoteOff, mergeTracks,
+                                         secondsFromTicks, T(Cons))
 import Sound.MIDI.File.Load             (fromFile)
 import Sound.MIDI.File.Event            (maybeMIDIEvent)
 import Sound.MIDI.Message.Channel       (Body(Voice), fromChannel,
@@ -17,7 +18,7 @@ type Note = (Int, Int) -- Drum part, intensity.
 open :: FilePath -> IO [(Rational, Note)]
 open filename = do
   -- Read file.
-  Cons typ division tracks <- fromFile filename
+  Cons typ division tracks <- liftM explicitNoteOff $ fromFile filename
   let track = secondsFromTicks division $ mergeTracks typ tracks
   -- Parse the MIDI files to get the notes.
   let notes = mapMaybe bodyToNote $ getMessages track
