@@ -3,20 +3,22 @@ module Analyse (analyse) where
 import Data.List (group, sort)
 
 -- | Use all below functions.
-analyse :: [(Rational, a)] -> [(Integer, [a])]
+analyse :: (RealFrac a, Ord a) => [(a, b)] -> [(Integer, [b])]
 analyse = uncurry zip . (mapFst treat) . unzip . join
   where
     treat = lastNote . detect . equalise . (drop 1)
 
 -- Use a simple but crude tempo detection. To be used after a pre-treatmnent.
-detect :: [Rational] -> [Integer]
+detect :: (RealFrac a, Ord a) => [a] -> [Integer]
 detect xs = map (closest . (* fromInteger len) . (m /)) xs
   where
     m        = majority xs
     majority = snd . maximum . (map (\x -> (length x, head x))) . group . sort
     len      = closest $ 3 / m
-    closest  = (2 ^) . log2 . fromRational
-    log2     = max 0 . round . (/ log 2) . log :: Double -> Integer
+    closest x
+      | x <= 4    = round x
+      | otherwise = 2 * (closest (x / 2))
+
 
 -- Equalise an integer list: close values next to each other are leveled.
 equalise :: (Fractional a, Ord a) => [a] -> [a]
