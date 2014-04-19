@@ -1,13 +1,14 @@
+TARGET = chartleston
 SRC = $(wildcard *.hs)
 
-all: main
+all: $(TARGET)
 
 clean:
 	rm -f *.o
 	rm -f *.hi
-	rm -f main
+	rm -f $(TARGET)
 
-main: $(SRC)
+$(TARGET): $(SRC)
 	ghc --make -Wall $^
 
 .PHONY: all clean
