@@ -4,10 +4,12 @@ import Data.List  (partition)
 import Data.Ratio (denominator)
 
 -- | Write the music in Lilypond format.
-write :: (Num a, Eq a, Ord b, Num b, Eq b) => [(Integer, [(a, b)])] -> String
-write x = prefix ++ (aux up) ++ "}\\\\{" ++ (aux down) ++ suffix
+write :: (Num a, Eq a, Ord b, Num b, Eq b) => [[(Integer, [(a, b)])]] -> String
+write x = prefix ++ (aux' up) ++ "}\\\\{" ++ (aux' down) ++ suffix
   where
-    (up, down) = voices x
+    (up, down) = unzip $ map voices x
+    aux' [] = ""
+    aux' (x':xs) = "            " ++ (aux x') ++ "\n" ++ (aux' xs)
     aux [] = ""
     aux ((t, [ ]):xs) = 'r' : (show t ++ " " ++ (aux xs))
     aux ((t, [n]):xs) = note' t n ++ " " ++ (aux xs)

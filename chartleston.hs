@@ -1,15 +1,16 @@
 import Data.Char          (toUpper)
 import System.Environment (getArgs)
 
-import Analyse (analyse)
-import Midi    (open)
-import Write   (write)
+import Analyse   (analyse)
+import Midi      (open)
+import Structure (measures)
+import Write     (write)
 
 main :: IO ()
 main = do
     args <- getArgs
     midi <- open $ args !! 0
-    writeFile (output args) $ write $ analyse $ midi
+    writeFile (output args) $ write $ measures $ analyse $ midi
 
 -- Read parameter from command line arguments.
 arg :: [String] -> String -> String
