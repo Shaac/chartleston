@@ -1,4 +1,4 @@
-module Structure where
+module Structure (measures) where
 
 import Data.Ratio (denominator)
 
