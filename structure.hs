@@ -3,7 +3,7 @@ module Structure (measures) where
 import Data.Ratio (denominator)
 
 measures :: [(Integer, a)] -> [[(Integer, a)]]
-measures = measure 0
+measures = measure (0 :: Rational)
   where
     measure _   []            = []
     measure acc (x@(t, _):xs) = let s = (1 / (fromInteger t) + acc) in
