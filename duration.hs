@@ -1,4 +1,4 @@
-module Duration (Duration, fromFractional) where
+module Duration (Duration, fromFractional, duration) where
 
 -- Basic: The note length is 1 / 2^n of that of the measure.
 -- Dotted: The note lengt is 1.5 times that of a basic note.

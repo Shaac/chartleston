@@ -2,15 +2,17 @@ module Analyse (analyse) where
 
 import Data.List (group, sort)
 
+import Duration (Duration, fromFractional, duration)
+
 -- | Use all below functions.
-analyse :: (RealFrac a, Ord a) => [(a, b)] -> [(Integer, [b])]
+analyse :: (RealFrac a, Ord a) => [(a, b)] -> [(Duration, [b])]
 analyse = uncurry zip . (mapFst treat) . unzip . join
   where
     treat = lastNote . detect . equalise . (drop 1)
 
 -- Use a simple but crude tempo detection. To be used after a pre-treatmnent.
-detect :: (RealFrac a, Ord a) => [a] -> [Integer]
-detect xs = map (closest . (* fromInteger len) . (m /)) xs
+detect :: (RealFrac a, Ord a) => [a] -> [Duration]
+detect xs = map (fromFractional . (* fromInteger len) . (m /)) xs
   where
     m        = majority xs
     majority = snd . maximum . (map (\x -> (length x, head x))) . group . sort
@@ -43,12 +45,12 @@ join = mergeZeros (0, []) . (setZeros 0)
     mergeZeros x ((x1, x2):xs) = x : (mergeZeros (x1, [x2]) xs)
 
 -- Give a duration to the last note, so that it last until the end of a mesure.
-lastNote :: [Integer] -> [Integer]
+lastNote :: [Duration] -> [Duration]
 lastNote = aux 0
   where
-    aux acc []    = [round $ 1 / (1 - dec)]
+    aux acc (x:xs) = x : (aux (duration x + acc) xs)
+    aux acc []     = [fromFractional $ 1 / (1 - dec)]
       where dec = snd (properFraction acc :: (Integer, Rational))
-    aux acc (x:xs) = x : (aux (1 / (fromInteger x) + acc) xs)
 
 -- Apply a function to the first item of a tuple.
 mapFst :: (a -> b) -> (a, c) -> (b, c)
