@@ -12,11 +12,10 @@ analyse = uncurry zip . (mapFst treat) . unzip . join
 
 -- Use a simple but crude tempo detection. To be used after a pre-treatmnent.
 detect :: (RealFrac a, Ord a) => [a] -> [Duration]
-detect xs = map (fromFractional . (* fromInteger len) . (m /)) xs
+detect xs = map (fromFractional . (/ norm)) xs
   where
-    m        = majority xs
+    norm     = let x = majority xs in x * fromInteger (closest $ 3 / x)
     majority = snd . maximum . (map (\x -> (length x, head x))) . group . sort
-    len      = closest $ 3 / m
     closest x
       | x <= 2    = max 1 $ round x
       | otherwise = 2 * (closest (x / 2))
