@@ -17,6 +17,7 @@ instance Num Duration where
     | x == y = Dotted (x - 1)
     | otherwise = Other
   Other + _ = Other
+  a + b = b + a
 
   (Basic x) - (Basic y)
     | x + 1 == y = Basic y
@@ -31,7 +32,7 @@ instance Num Duration where
   (Dotted x) - (Dotted y)
     | x + 1 == y = Dotted y
     | otherwise  = Other
-  Other - Other = Other
+  _ - _ = Other
 
   _ * _ = error "Multiplication has no meaning."
   signum _ = 1
@@ -55,6 +56,7 @@ instance Show Duration where
   show (Basic 7)    = "semihemidemisemiquaver"
   show (Basic x)    = "1 / (2^" ++ (show x) ++ ")"
   show (Dotted x)   = "dotted " ++ (show (Basic x))
+  show Other        = "unknown duration"
 
 instance Eq Duration where
   (Basic x)  == (Basic y)  = x == y
@@ -68,9 +70,9 @@ duration _          = error "No duration."
 
 fromFractional :: (Fractional a, Ord a) => a -> Duration
 fromFractional x
-  | x == 0 = Other
-  | x <= 1 = aux succ 0
-  | x >  1 = aux pred 0
+  | x <= 0    = Other
+  | x <= 1    = aux succ 0
+  | otherwise = aux pred 0
   where
     aux f i
       | diff i <= diff (f i) = fromInteger i
