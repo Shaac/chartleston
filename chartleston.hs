@@ -8,8 +8,12 @@ import Write     (write)
 
 main :: IO ()
 main = do
-    args <- getArgs
-    midi <- open $ args !! 0
+  args <- getArgs
+  midi <- open $ args !! 0
+  if map toUpper (arg args "debug") == "TRUE" then do
+    putStrLn $ show $ midi
+    putStrLn $ show $ analyse $ midi
+  else
     writeFile (output args) $ write $ measures $ analyse $ midi
 
 -- Read parameter from command line arguments.
