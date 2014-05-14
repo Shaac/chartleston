@@ -66,7 +66,7 @@ getNote n@(Basic x)  | x >= 0 = (++ format n)
 getNote n@(Dotted x) | x >= 0 = (++ format n)
 getNote n = aux n
   where
-    aux x "r" = "R1 * " ++ (show $ (numerator $ duration x :: Integer)) ++ "{}"
+    aux x "r" = "R1 * " ++ (show $ (numerator $ duration x :: Integer))
     aux _ s   = s ++ "1" -- TODO fix that
 
 format :: Duration -> String

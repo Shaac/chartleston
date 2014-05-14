@@ -85,7 +85,9 @@ prefix = unlines [
   "    \\set Staff.beamExceptions = #'()             " ++
     "% Beam quavers two by two.",
   "    \\set DrumStaff.drumStyleTable = #(alist->hash-table td15)",
-  "    \\drummode {"]
+  "    \\drummode {",
+  "        \\compressFullBarRests",
+  "        \\override MultiMeasureRest #'expand-limit = #1"]
 
 -- The end of the lilypond file.
 suffix :: String
