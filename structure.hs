@@ -2,11 +2,13 @@ module Structure (measures) where
 
 import Data.Ratio (denominator)
 
-measures :: [(Integer, a)] -> [[(Integer, a)]]
+import Duration (Duration, duration)
+
+measures :: [(Duration, a)] -> [[(Duration, a)]]
 measures = measure (0 :: Rational)
   where
     measure _   []            = []
-    measure acc (x@(t, _):xs) = let s = (1 / (fromInteger t) + acc) in
+    measure acc (x@(d, _):xs) = let s = (duration d + acc) in
       if denominator s == 1
         then [x] : (measure 0 xs)
         else let l = measure s xs in
