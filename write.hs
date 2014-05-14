@@ -1,8 +1,9 @@
 module Write (write) where
 
 import Data.List  (partition)
+import Data.Ratio (denominator)
 
-import Duration (Duration(Other), duration, denominator)
+import Duration (Duration(Other), duration, format)
 
 -- | Write the music in Lilypond format.
 write :: (Num a, Eq a, Ord b, Num b, Eq b) => [[(Duration, [(a, b)])]] -> String
@@ -12,13 +13,13 @@ write x = prefix ++ (aux' up) ++ "}\\\\{" ++ (aux' down) ++ suffix
     aux' [] = ""
     aux' (x':xs) = "            " ++ (aux x') ++ "\n" ++ (aux' xs)
     aux [] = ""
-    aux ((t, [ ]):xs) = 'r' : (denominator t ++ " " ++ (aux xs))
+    aux ((t, [ ]):xs) = 'r' : (format t ++ " " ++ (aux xs))
     aux ((t, [n]):xs) = note' t n ++ " " ++ (aux xs)
-    aux ((t, l):xs)   = '<' : (unwords $ map (note . fst) l) ++ ">" ++ (denominator t) ++ " " ++ (aux xs)
+    aux ((t, l):xs)   = '<' : (unwords $ map (note . fst) l) ++ ">" ++ (format t) ++ " " ++ (aux xs)
     note' t (n, v)
-      | v < 50        = "\\parenthesize " ++ (note n) ++ (denominator t)
-      | v == 127      = (note n) ++ (denominator t) ++ "->"
-      | otherwise     = note n ++ (denominator t)
+      | v < 50        = "\\parenthesize " ++ (note n) ++ (format t)
+      | v == 127      = (note n) ++ (format t) ++ "->"
+      | otherwise     = note n ++ (format t)
 
 -- Separate the notes in two voices. The cymbals are up, and the rest down.
 voices :: (Num a, Eq a, Eq b) =>
@@ -34,7 +35,7 @@ voices x = (removeRests $ zip time xs, removeRests $ zip time ys)
 
 -- Remove the rests on a voices by making previous notes longer.
 removeRests :: (Eq a) => [(Duration, [a])] -> [(Duration, [a])]
-removeRests = converge . (iterate (aux (0 :: Rational)))
+removeRests = converge . (iterate $ aux (0 :: Rational))
   where
     converge (x:y:xs) = if x == y then x else converge (y : xs)
     converge _        = fail "This can not occure."
@@ -43,11 +44,9 @@ removeRests = converge . (iterate (aux (0 :: Rational)))
       | otherwise     = (t1, x) : (aux (add e t1) $ (t2, []) : xs)
     aux e ((t, x):xs) = (t, x) : (aux (add e t) xs)
     aux _ []          = []
-    add e x           = let y = (duration x) + e in if y >= 1 then y - 1 else y
-    ok t e
-      | t' == 1   = False
-      | otherwise = if t' > e then True else t' <= add e t
-      where t' = duration t
+    add e x           = duration x + e
+    ok t e = if t' > denominator e then True else t' <= denominator (add e t)
+      where t' = denominator $ duration t
 
 -- The beginning of the lilypond file.
 prefix :: String

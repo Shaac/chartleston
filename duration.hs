@@ -1,4 +1,4 @@
-module Duration (Duration(Other), fromFractional, duration, denominator) where
+module Duration (Duration(Other), fromFractional, duration, format) where
 
 -- Basic: The note length is 1 / 2^n of that of the measure.
 -- Dotted: The note lengt is 1.5 times that of a basic note.
@@ -58,10 +58,10 @@ instance Show Duration where
   show (Dotted x)   = "dotted " ++ (show (Basic x))
   show Other        = "unknown duration"
 
-denominator :: Duration -> String
-denominator (Basic x)  = show $ (2 :: Integer) ^ (max x 0)
-denominator (Dotted x) = denominator (Basic x) ++ "."
-denominator Other      = "0"
+format :: Duration -> String
+format (Basic x)  = show $ (2 :: Integer) ^ (max x 0)
+format (Dotted x) = format (Basic x) ++ "."
+format Other      = "0"
 
 duration :: Fractional a => Duration -> a
 duration (Basic x)  = 1 / 2 ^^ x
