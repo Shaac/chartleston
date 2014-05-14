@@ -7,11 +7,10 @@ import Duration (Duration(Other), duration, format)
 
 -- | Write the music in Lilypond format.
 write :: (Num a, Eq a, Ord b, Num b, Eq b) => [[(Duration, [(a, b)])]] -> String
-write x = prefix ++ (aux' up) ++ "}\\\\{" ++ (aux' down) ++ suffix
+write x = prefix ++ (concatMap write' x) ++ suffix
   where
-    (up, down) = unzip $ map voices x
-    aux' [] = ""
-    aux' (x':xs) = "            " ++ (aux x') ++ "\n" ++ (aux' xs)
+    write' x'= "        <<\n            {" ++ (aux up) ++ "}\n            \\\\\n            {" ++ (aux down) ++ "}\n        >>\n"
+      where (up, down) = voices x'
     aux [] = ""
     aux ((t, [ ]):xs) = 'r' : (format t ++ " " ++ (aux xs))
     aux ((t, [n]):xs) = note' t n ++ " " ++ (aux xs)
@@ -80,16 +79,16 @@ prefix = unlines [
   "    \\set Staff.beamExceptions = #'()             " ++
     "% Beam quavers two by two.",
   "    \\set DrumStaff.drumStyleTable = #(alist->hash-table td15)",
-  "    \\drummode {",
-  "        << {"]
+  "    \\drummode {"]
 
 -- The end of the lilypond file.
 suffix :: String
 suffix = unlines [
-  "\\bar \"|.\"",
-  "        } >>",
+  "",
+  "        \\bar \"|.\"",
   "    }",
   ">>",
+  "",
   "% vim:filetype=lilypond"]
 
 -- Convert a MIDI instrument (number) to its Lilypond value.
