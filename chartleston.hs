@@ -13,6 +13,7 @@ main = do
   if map toUpper (arg args "debug") == "TRUE" then do
     putStrLn $ show $ midi
     putStrLn $ show $ analyse $ midi
+    putStrLn $ show $ measures $ analyse $ midi
   else
     writeFile (output args) $ write $ measures $ analyse $ midi
 
