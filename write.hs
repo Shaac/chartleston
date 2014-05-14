@@ -148,4 +148,4 @@ note 78 = "cuim"  -- Mute Cuíca
 note 79 = "cuio"  -- Open Cuíca
 note 80 = "trim"  -- Mute Triangle
 note 81 = "trio"  -- Open Triangle
-note _  = fail "Unexisting note."
+note _  = "tt" -- Phony instrument, so that in case of error it can compile
