@@ -3,7 +3,7 @@ module Write (write) where
 import Data.List  (partition)
 import Data.Ratio (denominator)
 
-import Duration (Duration(Other), duration, format)
+import Duration (Duration(Other), duration, getNote)
 
 -- | Write the music in Lilypond format.
 write :: (Num a, Eq a, Ord b, Num b, Eq b) => [[(Duration, [(a, b)])]] -> String
@@ -12,13 +12,13 @@ write x = prefix ++ (concatMap write' x) ++ suffix
     write' x'= "        <<\n            {" ++ (aux up) ++ "}\n            \\\\\n            {" ++ (aux down) ++ "}\n        >>\n"
       where (up, down) = voices x'
     aux [] = ""
-    aux ((t, [ ]):xs) = 'r' : (format t ++ " " ++ (aux xs))
+    aux ((t, [ ]):xs) = getNote t "r" ++ " " ++ (aux xs)
     aux ((t, [n]):xs) = note' t n ++ " " ++ (aux xs)
-    aux ((t, l):xs)   = '<' : (unwords $ map (note . fst) l) ++ ">" ++ (format t) ++ " " ++ (aux xs)
+    aux ((t, l):xs)   = getNote t ('<' : (unwords $ map (note . fst) l) ++ ">") ++ " " ++ (aux xs)
     note' t (n, v)
-      | v < 50        = "\\parenthesize " ++ (note n) ++ (format t)
-      | v == 127      = (note n) ++ (format t) ++ "->"
-      | otherwise     = note n ++ (format t)
+      | v < 50        = "\\parenthesize " ++ (getNote t $ note n)
+      | v == 127      = (getNote t $ note n) ++ "->"
+      | otherwise     = getNote t $ note n
 
 -- Separate the notes in two voices. The cymbals are up, and the rest down.
 voices :: (Num a, Eq a, Eq b) =>

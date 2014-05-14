@@ -1,4 +1,6 @@
-module Duration (Duration(Other), fromFractional, duration, format) where
+module Duration (Duration(Other), fromFractional, duration, getNote) where
+
+import Data.Ratio (numerator)
 
 -- Basic: The note length is 1 / 2^n of that of the measure.
 -- Dotted: The note lengt is 1.5 times that of a basic note.
@@ -57,6 +59,15 @@ instance Show Duration where
   show (Basic x)    = "1 / (2^" ++ (show x) ++ ")"
   show (Dotted x)   = "dotted " ++ (show (Basic x))
   show Other        = "unknown duration"
+
+getNote :: Duration -> String -> String
+getNote Other        = (++ format Other)
+getNote n@(Basic x)  | x >= 0 = (++ format n)
+getNote n@(Dotted x) | x >= 0 = (++ format n)
+getNote n = aux n
+  where
+    aux x "r" = "R1 * " ++ (show $ (numerator $ duration x :: Integer)) ++ "{}"
+    aux _ s   = s ++ "1" -- TODO fix that
 
 format :: Duration -> String
 format (Basic x)  = show $ (2 :: Integer) ^ (max x 0)
