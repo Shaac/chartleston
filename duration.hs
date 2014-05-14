@@ -1,4 +1,4 @@
-module Duration (Duration) where
+module Duration (Duration, fromFractional) where
 
 -- Basic: The note length is 1 / 2^n of that of the measure.
 -- Dotted: The note lengt is 1.5 times that of a basic note.
@@ -60,3 +60,19 @@ instance Eq Duration where
   (Basic x)  == (Basic y)  = x == y
   (Dotted x) == (Dotted y) = x == y
   _          == _          = False
+
+duration :: Fractional a => Duration -> a
+duration (Basic x)  = 1 / 2 ^^ x
+duration (Dotted x) = 1 / 2 ^^ x + 1 / 2 ^^ (x + 1)
+duration _          = error "No duration."
+
+fromFractional :: (Fractional a, Ord a) => a -> Duration
+fromFractional x
+  | x == 0 = Other
+  | x <= 1 = aux succ 0
+  | x >  1 = aux pred 0
+  where
+    aux f i
+      | diff i <= diff (f i) = fromInteger i
+      | otherwise            = aux f (f i)
+    diff i = abs (duration (fromInteger i) - x)
