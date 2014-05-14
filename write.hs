@@ -2,7 +2,7 @@ module Write (write) where
 
 import Data.List  (partition)
 
-import Duration (Duration(Other), duration)
+import Duration (Duration(Other), duration, denominator)
 
 -- | Write the music in Lilypond format.
 write :: (Num a, Eq a, Ord b, Num b, Eq b) => [[(Duration, [(a, b)])]] -> String
@@ -12,13 +12,13 @@ write x = prefix ++ (aux' up) ++ "}\\\\{" ++ (aux' down) ++ suffix
     aux' [] = ""
     aux' (x':xs) = "            " ++ (aux x') ++ "\n" ++ (aux' xs)
     aux [] = ""
-    aux ((t, [ ]):xs) = 'r' : (show t ++ " " ++ (aux xs))
+    aux ((t, [ ]):xs) = 'r' : (denominator t ++ " " ++ (aux xs))
     aux ((t, [n]):xs) = note' t n ++ " " ++ (aux xs)
-    aux ((t, l):xs)   = '<' : (unwords $ map (note . fst) l) ++ ">" ++ (show t) ++ " " ++ (aux xs)
+    aux ((t, l):xs)   = '<' : (unwords $ map (note . fst) l) ++ ">" ++ (denominator t) ++ " " ++ (aux xs)
     note' t (n, v)
-      | v < 50        = "\\parenthesize " ++ (note n) ++ (show t)
-      | v == 127      = (note n) ++ (show t) ++ "->"
-      | otherwise     = note n ++ (show t)
+      | v < 50        = "\\parenthesize " ++ (note n) ++ (denominator t)
+      | v == 127      = (note n) ++ (denominator t) ++ "->"
+      | otherwise     = note n ++ (denominator t)
 
 -- Separate the notes in two voices. The cymbals are up, and the rest down.
 voices :: (Num a, Eq a, Eq b) =>
