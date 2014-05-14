@@ -34,20 +34,16 @@ voices x = (removeRests $ zip time xs, removeRests $ zip time ys)
 
 -- Remove the rests on a voices by making previous notes longer.
 removeRests :: (Eq a) => [(Duration, [a])] -> [(Duration, [a])]
-removeRests = converge . (iterate (aux 0))
+removeRests = converge . (iterate (aux (0 :: Rational)))
   where
-    converge :: (Eq a) =>[[(Duration, [a])]] -> [(Duration, [a])]
     converge (x:y:xs) = if x == y then x else converge (y : xs)
     converge _        = fail "This can not occure."
-    aux :: (Eq a) =>Rational ->  [(Duration, [a])] -> [(Duration, [a])]
     aux e ((t1, x):(t2, []):xs)
       | t1 + t2 /= Other && ok t1 e = (t1 + t2, x) : (aux (add (add e t1) t2) xs)
       | otherwise     = (t1, x) : (aux (add e t1) $ (t2, []) : xs)
     aux e ((t, x):xs) = (t, x) : (aux (add e t) xs)
     aux _ []          = []
-    add :: Rational -> Duration -> Rational
     add e x           = let y = (duration x) + e in if y >= 1 then y - 1 else y
-    ok :: Duration -> Rational -> Bool
     ok t e
       | t' == 1   = False
       | otherwise = if t' > e then True else t' <= add e t
