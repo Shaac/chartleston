@@ -14,11 +14,17 @@ write x = prefix ++ (concatMap write' x) ++ suffix
     aux [] = ""
     aux ((t, [ ]):xs) = getNote t "r" ++ " " ++ (aux xs)
     aux ((t, [n]):xs) = note' t n ++ " " ++ (aux xs)
-    aux ((t, l):xs)   = getNote t ('<' : (unwords $ map (note . fst) l) ++ ">") ++ " " ++ (aux xs)
+    aux ((t, l@((n, _):_)):xs)
+      | isFlam l  = getNote t ("\\acciaccatura {\\once\\stemUp " ++ (note n) ++ "8}" ++ (note n)) ++ (aux xs)
+      | otherwise = getNote t ('<' : (unwords $ map (note . fst) l) ++ ">") ++ " " ++ (aux xs)
     note' t (n, v)
       | v < 50        = "\\parenthesize " ++ (getNote t $ note n)
       | v == 127      = (getNote t $ note n) ++ "->"
       | otherwise     = getNote t $ note n
+
+isFlam :: Eq a => [(a, b)] -> Bool
+isFlam [(x, _), (y, _)] = x == y
+isFlam _                = False
 
 -- Separate the notes in two voices. The cymbals are up, and the rest down.
 voices :: (Num a, Eq a, Eq b) =>
