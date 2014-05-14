@@ -9,7 +9,7 @@ import Duration (Duration(Other), duration, getNote)
 write :: (Num a, Eq a, Ord b, Num b, Eq b) => [[(Duration, [(a, b)])]] -> String
 write x = prefix ++ (concatMap write' x) ++ suffix
   where
-    write' x'= "        <<\n            {" ++ (aux up) ++ "}\n            \\\\\n            {" ++ (aux down) ++ "}\n        >>\n"
+    write' x'= "        << {\n            " ++ (aux up) ++ "\n        } \\\\ {\n            " ++ (aux down) ++ "\n        } >>\n"
       where (up, down) = voices x'
     aux [] = ""
     aux ((t, [ ]):xs) = getNote t "r" ++ " " ++ (aux xs)
