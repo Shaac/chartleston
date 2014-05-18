@@ -6,7 +6,7 @@ import Data.Ratio (denominator)
 import Duration (Duration(Other), duration, getNote)
 
 -- | Write the music in Lilypond format.
-write :: (Num a, Eq a, Ord b, Num b, Eq b) => [[(Duration, [(a, b)])]] -> String
+write :: (Num a, Eq a, Num b, Ord b) => [[(Duration, [(a, b)])]] -> String
 write x = prefix ++ (concatMap write' x) ++ suffix
   where
     write' x'= "        << {\n            " ++ (aux up) ++ "\n        } \\\\ {\n            " ++ (aux down) ++ "\n        } >>\n"
