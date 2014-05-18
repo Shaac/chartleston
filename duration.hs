@@ -13,7 +13,7 @@ instance Num Duration where
     | x + 1 == y = Dotted x
     | otherwise  = Other
   (Basic x) + (Dotted y)
-    | x + 1 == y = Basic (y - 1)
+    | x == y + 1 = Basic (y - 1)
     | otherwise = Other
   (Dotted x) + (Dotted y)
     | x == y = Dotted (x - 1)
