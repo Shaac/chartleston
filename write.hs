@@ -1,16 +1,14 @@
 module Write (write) where
 
-import Data.List  (partition)
-import Data.Ratio (denominator)
-
-import Duration (Duration(Other), duration, getNote)
+import Duration (Duration, getNote)
 
 -- | Write the music in Lilypond format.
-write :: (Num a, Eq a, Num b, Ord b) => [[(Duration, [(a, b)])]] -> String
+write :: (Num a, Eq a, Num b, Ord b) =>
+  [([(Duration, [(a, b)])], [(Duration, [(a, b)])])] -> String
 write x = prefix ++ (concatMap write' x) ++ suffix
   where
     write' x'= "        << {\n            " ++ (aux up) ++ "\n        } \\\\ {\n            " ++ (aux down) ++ "\n        } >>\n"
-      where (up, down) = voices x'
+      where (up, down) = (fst x', snd x')
     aux [] = ""
     aux ((t, [ ]):xs) = getNote t "r" ++ " " ++ (aux xs)
     aux ((t, [n]):xs) = note' t n ++ " " ++ (aux xs)
@@ -25,33 +23,6 @@ write x = prefix ++ (concatMap write' x) ++ suffix
 isFlam :: Eq a => [(a, b)] -> Bool
 isFlam [(x, _), (y, _)] = x == y
 isFlam _                = False
-
--- Separate the notes in two voices. The cymbals are up, and the rest down.
-voices :: (Num a, Eq a, Eq b) =>
-  [(Duration, [(a, b)])] -> ([(Duration, [(a, b)])], [(Duration, [(a, b)])])
-voices x = (removeRests $ zip time xs, removeRests $ zip time ys)
-  where
-    (xs', ys')    = unzip $ map (partition (flip elem cymbals . fst)) notes
-    (xs, ys)      = if ys' /= notes then (xs', ys') else
-                    unzip $ map (partition (flip elem toms . fst)) notes
-    (time, notes) = unzip x
-    cymbals       = [42, 46, 49, 51, 52, 53, 55, 57, 59]
-    toms          = [37, 38, 40, 41, 43, 45, 47, 48, 50]
-
--- Remove the rests on a voices by making previous notes longer.
-removeRests :: (Eq a) => [(Duration, [a])] -> [(Duration, [a])]
-removeRests = converge . (iterate $ aux (0 :: Rational))
-  where
-    converge (x:y:xs) = if x == y then x else converge (y : xs)
-    converge _        = fail "This can not occure."
-    aux e ((t1, x):(t2, []):xs)
-      | t1 + t2 /= Other && ok t1 e = (t1 + t2, x) : (aux (add (add e t1) t2) xs)
-      | otherwise     = (t1, x) : (aux (add e t1) $ (t2, []) : xs)
-    aux e ((t, x):xs) = (t, x) : (aux (add e t) xs)
-    aux _ []          = []
-    add e x           = duration x + e
-    ok t e = if t' > denominator e then True else t' <= denominator (add e t)
-      where t' = denominator $ duration t
 
 -- The beginning of the lilypond file.
 prefix :: String

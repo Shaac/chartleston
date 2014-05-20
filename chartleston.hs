@@ -3,7 +3,7 @@ import System.Environment (getArgs)
 
 import Analyse   (analyse)
 import Midi      (open)
-import Structure (measures)
+import Structure (structure)
 import Write     (write)
 
 main :: IO ()
@@ -13,9 +13,9 @@ main = do
   if map toUpper (arg args "debug") == "TRUE" then do
     putStrLn $ show $ midi
     putStrLn $ show $ analyse $ midi
-    putStrLn $ show $ measures $ analyse $ midi
+    putStrLn $ show $ structure $ analyse $ midi
   else
-    writeFile (output args) $ write $ measures $ analyse $ midi
+    writeFile (output args) $ write $ structure $ analyse $ midi
 
 -- Read parameter from command line arguments.
 arg :: [String] -> String -> String
