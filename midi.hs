@@ -1,4 +1,4 @@
-module Midi (open, Note) where
+module Midi (open) where
 
 import Data.EventList.Relative.TimeBody (mapMaybe, mapTime, toPairList)
 import Control.Monad                    (liftM, mfilter)
@@ -12,7 +12,7 @@ import Sound.MIDI.Message.Channel       (Body(Voice), fromChannel,
                                          messageBody, messageChannel)
 import Sound.MIDI.Message.Channel.Voice (fromPitch, fromVelocity, T(NoteOn))
 
-type Note = (Int, Int) -- Drum part, intensity.
+import Note (Note, fromPair)
 
 -- | Open a MIDI file, parse it, and return the notes list.
 open :: FilePath -> IO [(Rational, Note)]
@@ -32,5 +32,5 @@ open filename = do
 -- Get note information (pitch and velocity) from a MIDI channel message.
 -- Lose: all channel messages other than NoteOn (Mode information, NoteOff…).
 bodyToNote :: Body -> Maybe Note
-bodyToNote (Voice (NoteOn p v)) = Just (fromPitch p, fromVelocity v)
+bodyToNote (Voice (NoteOn p v)) = Just $ fromPair (fromPitch p, fromVelocity v)
 bodyToNote _                    = Nothing

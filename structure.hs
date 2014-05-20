@@ -4,9 +4,10 @@ import Data.List  (partition)
 import Data.Ratio (denominator)
 
 import Duration (Duration (Other), duration)
+import Note     (Note, isCymbal, isTom)
 
-structure :: (Num a, Eq a, Eq b) =>
-  [(Duration, [(a, b)])] -> [([(Duration, [(a, b)])], [(Duration, [(a, b)])])]
+structure :: [(Duration, [Note])] ->
+  [([(Duration, [Note])], [(Duration, [Note])])]
 structure = map voices . measures
 
 measures :: [(Duration, a)] -> [[(Duration, a)]]
@@ -21,16 +22,13 @@ measures = measure (0 :: Rational)
           else (x : (head l)) : (tail l)
 
 -- Separate the notes in two voices. The cymbals are up, and the rest down.
-voices :: (Num a, Eq a, Eq b) =>
-  [(Duration, [(a, b)])] -> ([(Duration, [(a, b)])], [(Duration, [(a, b)])])
+voices :: [(Duration, [Note])] -> ([(Duration, [Note])], [(Duration, [Note])])
 voices x = (removeRests $ zip time xs, removeRests $ zip time ys)
   where
-    (xs', ys')    = unzip $ map (partition (flip elem cymbals . fst)) notes
-    (xs, ys)      = if ys' /= notes then (xs', ys') else
-                    unzip $ map (partition (flip elem toms . fst)) notes
+    (xs', ys')    = unzip $ map (partition isCymbal) notes
+    (xs, ys)      = if null xs' then unzip $ map (partition isTom) notes
+                    else (xs', ys')
     (time, notes) = unzip x
-    cymbals       = [42, 46, 49, 51, 52, 53, 55, 57, 59]
-    toms          = [37, 38, 40, 41, 43, 45, 47, 48, 50]
 
 -- Remove the rests on a voices by making previous notes longer.
 removeRests :: (Eq a) => [(Duration, [a])] -> [(Duration, [a])]

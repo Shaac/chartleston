@@ -60,14 +60,12 @@ instance Show Duration where
   show (Dotted x)   = "dotted " ++ (show (Basic x))
   show Other        = "unknown duration"
 
-getNote :: Duration -> String -> String
-getNote Other        = (++ format Other)
-getNote n@(Basic x)  | x >= 0 = (++ format n)
-getNote n@(Dotted x) | x >= 0 = (++ format n)
-getNote n = aux n
-  where
-    aux x "r" = "R1 * " ++ (show $ (numerator $ duration x :: Integer))
-    aux _ s   = s ++ "1" -- TODO fix that
+getNote :: Duration -> (String -> String) -> String
+getNote Other        = flip ($) $ format Other
+getNote n@(Basic x)  | x >= 0 = flip ($) $ format n
+getNote n@(Dotted x) | x >= 0 = flip ($) $ format n
+getNote n = const $ show $ (numerator $ duration n :: Integer)
+-- TODO: long non-rest notes
 
 format :: Duration -> String
 format (Basic x)  = show $ (2 :: Integer) ^ (max x 0)
