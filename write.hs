@@ -12,9 +12,11 @@ import Note     (Note, show')
 write :: [([(Duration, [Note])], [(Duration, [Note])])] -> String
 write = (prefix ++) . (++ suffix) . (concatMap write')
   where
-    write' x = "        << {\n            " ++ (aux up) ++ "\n        } \\\\ {\n            " ++ (aux down) ++ "\n        } >>\n"
-      where (up, down) = (fst x, snd x)
-    aux = unwords . (map $ uncurry showNotes)
+    write' (x, y)  = voices (showVoice x) (showVoice y)
+    showVoice      = unwords . (map $ uncurry showNotes)
+    voices up down = "        << {\n            " ++ up ++
+                     "\n        } \\\\ {\n            " ++
+                     down ++ "\n        } >>\n"
 
 
 ---------------------
