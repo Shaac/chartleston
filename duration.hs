@@ -64,7 +64,7 @@ getNote :: Duration -> (String -> String) -> String
 getNote Other        = flip ($) $ format Other
 getNote n@(Basic x)  | x >= 0 = flip ($) $ format n
 getNote n@(Dotted x) | x >= 0 = flip ($) $ format n
-getNote n = const $ show $ (numerator $ duration n :: Integer)
+getNote n = const $ "R1 * " ++ (show $ (numerator $ duration n :: Integer))
 -- TODO: long non-rest notes
 
 format :: Duration -> String
