@@ -2,11 +2,16 @@ module Duration (Duration(Other), fromFractional, duration, getNote) where
 
 import Data.Ratio (numerator)
 
+---------------
+-- Structure --
+---------------
+
 -- Basic: The note length is 1 / 2^n of that of the measure.
 -- Dotted: The note lengt is 1.5 times that of a basic note.
 data Duration = Basic Integer | Dotted Integer | Other deriving Eq
 
 instance Num Duration where
+  -- | Two notes can be added if the sum is a regular note.
   (Basic x) + (Basic y)
     | x == y     = Basic (x - 1)
     | x == y + 1 = Dotted y
@@ -21,6 +26,7 @@ instance Num Duration where
   Other + _ = Other
   a + b = b + a
 
+  -- | Soustraction of two notes will probably never be used but still.
   (Basic x) - (Basic y)
     | x + 1 == y = Basic y
     | x + 2 == y = Dotted (y + 1)
@@ -36,15 +42,18 @@ instance Num Duration where
     | otherwise  = Other
   _ - _ = Other
 
+  -- These are required for Num instance, but have no meaning here.
   _ * _ = error "Multiplication has no meaning."
   signum _ = 1
   abs = id
 
+  -- | A bijection is defined between durations and integers.
   fromInteger x
     | x `mod` 2 == 0 = Basic (x `div` 2)
     | otherwise      = Dotted ((x + 1) `div` 2)
 
 instance Show Duration where
+  -- | Display the duration name in UK English.
   show (Basic (-3)) = "maxima"
   show (Basic (-2)) = "longa"
   show (Basic (-1)) = "breve"
@@ -60,23 +69,27 @@ instance Show Duration where
   show (Dotted x)   = "dotted " ++ (show (Basic x))
   show Other        = "unknown duration"
 
+
+------------------------
+-- Exported functions --
+------------------------
+
+-- | Inject the string formatting of a duration in a function taking this
+-- string and returning tho Lilypond string of a note.
 getNote :: Duration -> (String -> String) -> String
 getNote Other        = flip ($) $ format Other
-getNote n@(Basic x)  | x >= 0 = flip ($) $ format n
+getNote n@(Basic  x) | x >= 0 = flip ($) $ format n
 getNote n@(Dotted x) | x >= 0 = flip ($) $ format n
 getNote n = const $ "R1 * " ++ (show $ (numerator $ duration n :: Integer))
 -- TODO: long non-rest notes
 
-format :: Duration -> String
-format (Basic x)  = show $ (2 :: Integer) ^ (max x 0)
-format (Dotted x) = format (Basic x) ++ "."
-format Other      = "0"
-
+-- | Give the fraction of a measure corresponding to a Duration.
 duration :: Fractional a => Duration -> a
-duration (Basic x)  = 1 / 2 ^^ x
+duration (Basic  x) = 1 / 2 ^^ x
 duration (Dotted x) = 1 / 2 ^^ x + 1 / 2 ^^ (x + 1)
 duration _          = error "No duration."
 
+-- | Get the closest Duration corresponding to a fraction of a measure.
 fromFractional :: (Fractional a, Ord a) => a -> Duration
 fromFractional x
   | x <= 0    = Other
@@ -87,3 +100,14 @@ fromFractional x
       | diff i <= diff (f i) = fromInteger i
       | otherwise            = aux f (f i)
     diff i = abs (duration (fromInteger i) - x)
+
+
+---------------------
+-- Local functions --
+---------------------
+
+-- Return the Lilypond suffix corresponding to the duration.
+format :: Duration -> String
+format (Basic  x) = show $ (2 :: Integer) ^ (max x 0) -- TODO: x < 0
+format (Dotted x) = format (Basic x) ++ "."
+format Other      = "0"
