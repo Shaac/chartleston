@@ -6,13 +6,25 @@ import Data.Ratio (denominator)
 import Duration (Duration (Other), duration)
 import Note     (Note, isCymbal, isTom, flams)
 
+------------------------
+-- Exported functions --
+------------------------
+
+-- | Get the structure of a notes list.
 structure :: [(Duration, [Note])] ->
   [([(Duration, [Note])], [(Duration, [Note])])]
 structure = map voices . measures . getFlams
 
+
+---------------------
+-- Local functions --
+---------------------
+
+-- Set the flams as such.
 getFlams :: [(a, [Note])] -> [(a, [Note])]
 getFlams = map (\(x, y) -> (x, flams y))
 
+-- Regroup the notes by measure.
 measures :: [(Duration, a)] -> [[(Duration, a)]]
 measures = measure (0 :: Rational)
   where

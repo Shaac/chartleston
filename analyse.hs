@@ -4,11 +4,21 @@ import Data.List (group, sort)
 
 import Duration (Duration, fromFractional, duration)
 
--- | Use all below functions.
+
+------------------------
+-- Exported functions --
+------------------------
+
+-- | Analyse a list of real notes and organise them with regular durations.
 analyse :: (RealFrac a, Ord a) => [(a, b)] -> [(Duration, [b])]
 analyse = uncurry zip . (mapFst treat) . unzip . join
   where
     treat = lastNote . detect . equalise . (drop 1)
+
+
+---------------------
+-- Local functions --
+---------------------
 
 -- Use a simple but crude tempo detection. To be used after a pre-treatmnent.
 detect :: (RealFrac a, Ord a) => [a] -> [Duration]

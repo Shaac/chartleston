@@ -14,6 +14,10 @@ import Sound.MIDI.Message.Channel.Voice (fromPitch, fromVelocity, T(NoteOn))
 
 import Note (Note, fromPair)
 
+------------------------
+-- Exported functions --
+------------------------
+
 -- | Open a MIDI file, parse it, and return the notes list.
 open :: FilePath -> IO [(Rational, Note)]
 open filename = do
@@ -28,6 +32,11 @@ open filename = do
     -- Lose: meta events, system exclusive information.
     getMessages  = mapMaybe $ liftM messageBody . isPercussion . maybeMIDIEvent
     isPercussion = mfilter $ (== 9) . fromChannel . messageChannel
+
+
+---------------------
+-- Local functions --
+---------------------
 
 -- Get note information (pitch and velocity) from a MIDI channel message.
 -- Lose: all channel messages other than NoteOn (Mode information, NoteOff…).

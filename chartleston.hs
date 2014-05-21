@@ -6,6 +6,12 @@ import Midi      (open)
 import Structure (structure)
 import Write     (write)
 
+-------------------
+-- Main function --
+-------------------
+
+-- | Read a midi file name from the command line and create its corresponding
+-- sheet music.
 main :: IO ()
 main = do
   args <- getArgs
@@ -16,6 +22,11 @@ main = do
     putStrLn $ show $ structure $ analyse $ midi
   else
     writeFile (output args) $ write $ structure $ analyse $ midi
+
+
+---------------------
+-- Local functions --
+---------------------
 
 -- Read parameter from command line arguments.
 arg :: [String] -> String -> String
