@@ -92,4 +92,4 @@ suffix = unlines [
   "    }",
   ">>",
   "",
-  "% vim:filetype=lilypond"]
+  "% vi" ++ "m:filetype=lilypond"]
