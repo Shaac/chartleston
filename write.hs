@@ -1,7 +1,7 @@
 module Write (write) where
 
 import Duration (Duration, getNote)
-import Note     (Note, show', isFlam)
+import Note     (Note, show')
 
 -- | Write the music in Lilypond format.
 write :: [([(Duration, [Note])], [(Duration, [Note])])] -> String
@@ -12,9 +12,7 @@ write x = prefix ++ (concatMap write' x) ++ suffix
     aux [] = ""
     aux ((t, [ ]):xs) = getNote t ("r" ++) ++ " " ++ (aux xs)
     aux ((t, [n]):xs) = getNote t (show' n) ++ " " ++ (aux xs)
-    aux ((t, l@(n:_)):xs)
---      | isFlam l  = getNote t ("\\acciaccatura {\\once\\stemUp " ++ (show' n) ++ "8}" ++ (show n)) ++ (aux xs)
-      | otherwise = getNote t (('<' : (unwords $ map show l) ++ ">") ++) ++ " " ++ (aux xs)
+    aux ((t,  l ):xs) = getNote t (('<' : (unwords $ map show l) ++ ">") ++) ++ " " ++ (aux xs)
 
 -- The beginning of the lilypond file.
 prefix :: String

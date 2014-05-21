@@ -1,25 +1,29 @@
-module Note (Note, show', fromPair, isCymbal, isTom, isFlam) where
+module Note (Note, show', fromPair, isCymbal, isTom) where
 
-data Note = N (Int, Int)
+data Note = Note (Int, Int) | Flam (Int)
 data Velocity = Ghost | Regular | Accent deriving (Eq, Ord, Show)
 
 instance Eq Note where
-  a == b = pitch a == pitch b && velocity a == velocity b
+  x@(Note (p, _)) == x'@(Note (p', _)) = p == p' && velocity x == velocity x'
+  Flam (p) == Flam (p')                = p == p'
+  _ == _                               = False
 
 threshold :: Int
 threshold = 50
 
 show' :: Note -> String -> String
-show' x = let instr = instrument (pitch x) in case velocity x of
+show' x@(Note (p, _)) = let instr = instrument p in case velocity x of
   Ghost   -> (("\\parenthesize " ++ instr) ++)
   Regular -> (instr ++)
   Accent  -> (instr ++) . (++ "->")
+show' (Flam p) = (("\\acciaccatura{\\once\\stemUp " ++ i ++ "8}" ++ i) ++)
+  where i = instrument p
 
 instance Show Note where
   show = flip show' ""
 
 fromPair :: (Int, Int) -> Note
-fromPair = N
+fromPair = Note
 
 isCymbal :: Note -> Bool
 isCymbal = flip elem [42, 46, 49, 51, 52, 53, 55, 57, 59] . pitch
@@ -27,18 +31,15 @@ isCymbal = flip elem [42, 46, 49, 51, 52, 53, 55, 57, 59] . pitch
 isTom :: Note -> Bool
 isTom = flip elem [37, 38, 40, 41, 43, 45, 47, 48, 50] . pitch
 
-isFlam :: [Note] -> Bool
-isFlam [N(x, _), N(y, _)] = x == y
-isFlam _                  = False
-
-
 pitch :: Note -> Int
-pitch (N (p, _)) = p
+pitch (Note (p, _)) = p
+pitch (Flam (p))    = p
 
 velocity :: Note -> Velocity
-velocity (N (_, v)) | v == 127      = Accent
-velocity (N (_, v)) | v > threshold = Regular
-velocity _                          = Ghost
+velocity (Note (_, v)) | v == 127      = Accent
+velocity (Note (_, v)) | v > threshold = Regular
+velocity (Note (_, _))                 = Ghost
+velocity _                             = Regular
 
 -- Convert a MIDI instrument (number) to its Lilypond value.
 instrument :: (Num a, Eq a) => a -> String
