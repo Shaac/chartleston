@@ -10,24 +10,30 @@ import Note     (Note, show')
 
 -- | Write the music in Lilypond format.
 write :: [([(Duration, [Note])], [(Duration, [Note])])] -> String
-write = (prefix ++) . (++ suffix) . (concatMap write')
-  where
-    write' (x, y)  = voices (showVoice x) (showVoice y)
-    showVoice      = unwords . (map $ uncurry showNotes)
-    voices up down = "        << {\n            " ++ up ++
-                     "\n        } \\\\ {\n            " ++
-                     down ++ "\n        } >>\n"
+write = (prefix ++) . (++ suffix) . (concatMap $ uncurry voices)
 
 
 ---------------------
 -- Local functions --
 ---------------------
 
+-- Get the Lilypond notation for an entire measure.
+voices :: [(Duration, [Note])] -> [(Duration, [Note])] -> String
+voices [] x    = "        " ++ (voice x) ++ "\n"
+voices x  []   = "        " ++ (voice x) ++ "\n"
+voices up down = "        << {\n            " ++ (voice up) ++
+                 "\n        } \\\\ {\n            " ++ (voice down)
+                 ++ "\n        } >>\n"
+
+-- Get the Lilypond notation for an entire voice.
+voice :: [(Duration, [Note])] -> String
+voice = unwords . (map $ uncurry notes)
+
 -- Get the Lilypond notation for simultaneous notes.
-showNotes :: Duration -> [Note] -> String
-showNotes d [ ] = showNote d ("r" ++)
-showNotes d [n] = showNote d (show' n)
-showNotes d  l  = showNote d (('<' : (unwords $ map show l) ++ ">") ++)
+notes :: Duration -> [Note] -> String
+notes d [ ] = showNote d ("r" ++)
+notes d [n] = showNote d (show' n)
+notes d  l  = showNote d (('<' : (unwords $ map show l) ++ ">") ++)
 
 
 ---------------------
