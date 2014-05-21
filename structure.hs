@@ -4,11 +4,14 @@ import Data.List  (partition)
 import Data.Ratio (denominator)
 
 import Duration (Duration (Other), duration)
-import Note     (Note, isCymbal, isTom)
+import Note     (Note, isCymbal, isTom, flams)
 
 structure :: [(Duration, [Note])] ->
   [([(Duration, [Note])], [(Duration, [Note])])]
-structure = map voices . measures
+structure = map voices . measures . getFlams
+
+getFlams :: [(a, [Note])] -> [(a, [Note])]
+getFlams = map (\(x, y) -> (x, flams y))
 
 measures :: [(Duration, a)] -> [[(Duration, a)]]
 measures = measure (0 :: Rational)
