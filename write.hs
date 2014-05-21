@@ -1,6 +1,6 @@
 module Write (write) where
 
-import Duration (Duration, getNote)
+import Duration (Duration, showNote)
 import Note     (Note, show')
 
 -- | Write the music in Lilypond format.
@@ -9,10 +9,12 @@ write x = prefix ++ (concatMap write' x) ++ suffix
   where
     write' x'= "        << {\n            " ++ (aux up) ++ "\n        } \\\\ {\n            " ++ (aux down) ++ "\n        } >>\n"
       where (up, down) = (fst x', snd x')
-    aux [] = ""
-    aux ((t, [ ]):xs) = getNote t ("r" ++) ++ " " ++ (aux xs)
-    aux ((t, [n]):xs) = getNote t (show' n) ++ " " ++ (aux xs)
-    aux ((t,  l ):xs) = getNote t (('<' : (unwords $ map show l) ++ ">") ++) ++ " " ++ (aux xs)
+    aux = unwords . (map $ uncurry showNotes)
+
+showNotes :: Duration -> [Note] -> String
+showNotes d [ ] = showNote d ("r" ++)
+showNotes d [n] = showNote d (show' n)
+showNotes d  l  = showNote d (('<' : (unwords $ map show l) ++ ">") ++)
 
 -- The beginning of the lilypond file.
 prefix :: String

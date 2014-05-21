@@ -1,4 +1,4 @@
-module Duration (Duration(Other), fromFractional, duration, getNote) where
+module Duration (Duration(Other), fromFractional, duration, showNote) where
 
 import Data.Ratio (numerator)
 
@@ -76,11 +76,11 @@ instance Show Duration where
 
 -- | Inject the string formatting of a duration in a function taking this
 -- string and returning tho Lilypond string of a note.
-getNote :: Duration -> (String -> String) -> String
-getNote Other        = flip ($) $ format Other
-getNote n@(Basic  x) | x >= 0 = flip ($) $ format n
-getNote n@(Dotted x) | x >= 0 = flip ($) $ format n
-getNote n = const $ "R1 * " ++ (show $ (numerator $ duration n :: Integer))
+showNote :: Duration -> (String -> String) -> String
+showNote Other                 = flip ($) $ lilypond Other
+showNote n@(Basic  x) | x >= 0 = flip ($) $ lilypond n
+showNote n@(Dotted x) | x >= 0 = flip ($) $ lilypond n
+showNote n = const $ "R1 * " ++ (show $ (numerator $ duration n :: Integer))
 -- TODO: long non-rest notes
 
 -- | Give the fraction of a measure corresponding to a Duration.
@@ -107,7 +107,7 @@ fromFractional x
 ---------------------
 
 -- Return the Lilypond suffix corresponding to the duration.
-format :: Duration -> String
-format (Basic  x) = show $ (2 :: Integer) ^ (max x 0) -- TODO: x < 0
-format (Dotted x) = format (Basic x) ++ "."
-format Other      = "0"
+lilypond :: Duration -> String
+lilypond (Basic  x) = show $ (2 :: Integer) ^ (max x 0) -- TODO: x < 0
+lilypond (Dotted x) = lilypond (Basic x) ++ "."
+lilypond Other      = "0"
