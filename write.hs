@@ -20,15 +20,15 @@ write = (prefix ++) . (++ suffix) . (concatMap $ uncurry voices)
 -- Get the Lilypond notation for an entire measure.
 voices :: [(Duration, [Note])] -> [(Duration, [Note])] -> String
 voices up down
-  | all (null . snd) up   = "        " ++ (voice down) ++ "\n"
-  | all (null . snd) down = "        " ++ (voice up)   ++ "\n"
-  | otherwise             = "        << {\n            " ++ (voice up) ++
-                            "\n        } \\\\ {\n            " ++
-                            (voice down) ++ "\n        } >>\n"
+  | all (null . snd) up   = voice 2 down
+  | all (null . snd) down = voice 2 up
+  | otherwise             = "        << {\n" ++ (voice 3 up) ++ "        } \\"
+                            ++ "\\ {\n" ++ (voice 3 down) ++ "        } >>\n"
 
 -- Get the Lilypond notation for an entire voice.
-voice :: [(Duration, [Note])] -> String
-voice = unwords . (map $ uncurry notes)
+voice :: Int -> [(Duration, [Note])] -> String
+voice t = pretty . (map $ uncurry notes)
+  where pretty = ((replicate (t * 4) ' ') ++) . (++ "\n") . unwords
 
 -- Get the Lilypond notation for simultaneous notes.
 notes :: Duration -> [Note] -> String
