@@ -93,13 +93,13 @@ duration _          = error "No duration."
 fromFractional :: (Fractional a, Ord a) => a -> Duration
 fromFractional x
   | x <= 0    = Other
-  | x <= 1    = aux succ 0
-  | otherwise = aux pred 0
+  | x <= 1    = search succ 0
+  | otherwise = search pred 0
   where
-    aux f i
-      | diff i <= diff (f i) = fromInteger i
-      | otherwise            = aux f (f i)
-    diff i = abs (duration (fromInteger i) - x)
+    search next i
+      | diff i <= diff (next i) = fromInteger i
+      | otherwise               = search next $ next i
+    diff                        = abs . (subtract x) . duration . fromInteger
 
 
 ---------------------
