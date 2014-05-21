@@ -25,10 +25,17 @@ voices up down
   | otherwise             = "        << {\n" ++ (voice 3 up) ++ "        } \\"
                             ++ "\\ {\n" ++ (voice 3 down) ++ "        } >>\n"
 
--- Get the Lilypond notation for an entire voice.
+-- Get the Lilypond notation for an entire voice. Limit the line length.
 voice :: Int -> [(Duration, [Note])] -> String
 voice t = pretty . (map $ uncurry notes)
-  where pretty = ((replicate (t * 4) ' ') ++) . (++ "\n") . unwords
+  where
+    pretty = concatMap (((replicate (t * 4) ' ') ++) . (++ "\n")) . (lines' "")
+    lines' acc []                 = [acc]
+    lines' ""  (x : xs)           = lines' x xs
+    lines' acc l@(x : xs)
+      | length acc + length x > m = acc : lines' "" l
+      | otherwise                 = lines' (acc ++ " " ++ x) xs
+    m = 78 - t * 4
 
 -- Get the Lilypond notation for simultaneous notes.
 notes :: Duration -> [Note] -> String
