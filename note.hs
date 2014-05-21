@@ -1,4 +1,4 @@
-module Note (Note, show', fromPair, isCymbal, isTom) where
+module Note (Note, show', fromPair, isCymbal, isTom, flams) where
 
 data Note = Note (Int, Int) | Flam (Int)
 data Velocity = Ghost | Regular | Accent deriving (Eq, Ord, Show)
@@ -30,6 +30,13 @@ isCymbal = flip elem [42, 46, 49, 51, 52, 53, 55, 57, 59] . pitch
 
 isTom :: Note -> Bool
 isTom = flip elem [37, 38, 40, 41, 43, 45, 47, 48, 50] . pitch
+
+flams :: [Note] -> [Note]
+flams (x@(Note (p, _)) : xs)
+  | p `elem` (map pitch xs) = Flam p : flams (filter ((/= p) . pitch) xs)
+  | otherwise               = x : flams xs
+flams (x : xs)              = x : flams xs
+flams x                     = x
 
 pitch :: Note -> Int
 pitch (Note (p, _)) = p
