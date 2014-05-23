@@ -23,10 +23,7 @@ instance Num Duration where
   a@(Dotted x) + b@(Dotted y)
     | x == y = Dotted (x - 1)
     | otherwise = Other (duration a + duration b)
-  (Other r) + x
-    | duration (fromFractional d) == d = fromFractional d
-    | otherwise                        = Other (d)
-    where d = r + duration x
+  (Other r) + x = fromFractional' (r + duration x :: Rational)
   a + b = b + a
 
   -- | Soustraction of two notes will probably never be used but still.
@@ -43,17 +40,14 @@ instance Num Duration where
   a@(Dotted x) - b@(Dotted y)
     | x + 1 == y = Dotted y
     | otherwise  = Other (duration a - duration b)
-  a - b
-    | duration (fromFractional d) == d = fromFractional d
-    | otherwise                        = Other (d)
-    where d = duration a - duration b
+  a - b          = fromFractional' (duration a - duration b :: Rational)
 
   negate = (Other 0 -)
 
   (Basic  x) * (Basic  y) = Basic  $ x + y
   (Basic  x) * (Dotted y) = Dotted $ x + y
   (Dotted x) * (Dotted y) = Dotted $ x + y - 1
-  (Other  x) * d          = Other (x + duration d) + Other 0 -- Check if basic.
+  (Other  x) * d          = fromFractional' $ x + duration d
   a          * b          = b * a
 
   signum (Other x)
@@ -76,9 +70,9 @@ instance Ord Duration where
 instance Fractional Duration where
   recip   (Basic  x) = Basic $ - x
   recip n@(Dotted _) = Other $ recip $ duration n
-  recip   (Other  x) = Other (recip x) + Other 0 -- Check if real note now.
+  recip   (Other  x) = fromFractional' $ recip x
 
-  fromRational = (Other 0 +) . Other
+  fromRational = fromFractional'
 
 instance Show Duration where
   -- | Display the duration name in UK English.
@@ -141,6 +135,10 @@ fromFractional x
 ---------------------
 -- Local functions --
 ---------------------
+
+fromFractional' :: (Fractional a, Ord a, Real a) => a -> Duration
+fromFractional' x = if (x == duration try) then try else Other $ toRational x
+  where try = fromFractional x
 
 -- Return the Lilypond suffix corresponding to the duration.
 lilypond :: Duration -> String
