@@ -124,13 +124,13 @@ showNote n = const $ "R1 * " ++ (show $ (numerator $ duration n :: Integer))
 fromFractional :: (Fractional a, Ord a, Real a) => a -> Duration
 fromFractional x
   | x <= 0    = Other (toRational x)
-  | x <= 1    = search succ 1
-  | otherwise = search pred 1
+  | x <= 1    = search succ $ Basic 0
+  | otherwise = search pred $ Basic 0
   where
     search next i
-      | diff i <= diff (next i) = toEnum i
+      | diff i <= diff (next i) = i
       | otherwise               = search next $ next i
-    diff                        = abs . (subtract x) . duration . toEnum
+    diff                        = abs . (subtract x) . duration
 
 
 ---------------------
