@@ -3,7 +3,7 @@ module Structure (structure) where
 import Data.List  (partition)
 import Data.Ratio (denominator)
 
-import Duration (Duration, isNote, duration)
+import Duration (Duration, isNote)
 import Note     (Note, isCymbal, isTom, flams)
 
 ------------------------
@@ -29,7 +29,7 @@ measures :: [(Duration, a)] -> [[(Duration, a)]]
 measures = measure (0 :: Rational)
   where
     measure _   []            = []
-    measure acc (x@(d, _):xs) = let s = (duration d + acc) in
+    measure acc (x@(d, _):xs) = let s = (toRational d + acc) in
       if denominator s == 1
         then [x] : (measure 0 xs)
         else let l = measure s xs in
@@ -56,6 +56,6 @@ removeRests = converge . (iterate $ aux (0 :: Rational))
       | otherwise     = (t1, x) : (aux (add e t1) $ (t2, []) : xs)
     aux e ((t, x):xs) = (t, x) : (aux (add e t) xs)
     aux _ []          = []
-    add e x           = duration x + e
+    add e x           = toRational x + e
     ok t e = if t' > denominator e then True else t' <= denominator (add e t)
-      where t' = denominator $ duration t
+      where t' = denominator $ toRational t

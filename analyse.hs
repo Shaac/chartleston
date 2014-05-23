@@ -2,7 +2,7 @@ module Analyse (analyse) where
 
 import Data.List (group, sort)
 
-import Duration (Duration, fromFractional, duration)
+import Duration (Duration, fromFractional)
 
 
 ------------------------

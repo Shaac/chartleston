@@ -1,4 +1,4 @@
-module Duration (Duration, fromFractional, isNote, duration, showNote) where
+module Duration (Duration, fromFractional, isNote, showNote) where
 
 import Data.Ratio (numerator)
 
@@ -120,12 +120,6 @@ showNote n@(Dotted x) | x >= 0 = flip ($) $ lilypond n
 showNote n = const $ "R1 * " ++ (show $ (numerator $ duration n :: Integer))
 -- TODO: long non-rest notes
 
--- | Give the fraction of a measure corresponding to a Duration.
-duration :: Fractional a => Duration -> a
-duration (Basic  x) = 1 / 2 ^^ x
-duration (Dotted x) = 3 / 2 ^^ (x + 1)
-duration (Other  x) = fromRational x
-
 -- | Get the closest Duration corresponding to a fraction of a measure.
 fromFractional :: (Fractional a, Ord a, Real a) => a -> Duration
 fromFractional x
@@ -142,6 +136,12 @@ fromFractional x
 ---------------------
 -- Local functions --
 ---------------------
+
+-- Give the fraction of a measure corresponding to a Duration.
+duration :: Fractional a => Duration -> a
+duration (Basic  x) = 1 / 2 ^^ x
+duration (Dotted x) = 3 / 2 ^^ (x + 1)
+duration (Other  x) = fromRational x
 
 fromFractional' :: (Fractional a, Ord a, Real a) => a -> Duration
 fromFractional' x = if (x == duration try) then try else Other $ toRational x
