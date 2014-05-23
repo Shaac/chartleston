@@ -58,17 +58,14 @@ equalise' xs  = let (similar, rest) = cut xs in level similar ++ (equalise' rest
 
 -- Join notes that are close into simultaneous notes.
 join :: (Fractional a, Ord a) => [(a, b)] -> [(a, [b])]
-join = mergeZeros (0, []) . (setZeros 0)
+join []            = []
+join ((d, n) : xs) = (d + s, n : map snd simult) : join rest
   where
-    -- Set close to zero numbers to zero, and add that time to next note.
-    setZeros _ []   = []
-    setZeros t ((time, note):xs)
-      | time < 0.05 = (0, note) : (setZeros (time + t) xs)
-      | otherwise = (time + t, note) : (setZeros 0 xs)
-    -- Merge notes with a time of zero with the previous one.
-    mergeZeros x [] = [x]
-    mergeZeros (time, note) ((0, x):xs) = mergeZeros (time, x : note) xs
-    mergeZeros x ((x1, x2):xs) = x : (mergeZeros (x1, [x2]) xs)
+    (simult, after) = span ((< 0.05) . fst) xs
+    rest
+      | null after  = []
+      | otherwise   = mapFst (+ s) (head after) : tail after
+    s               = (/ 2) $ sum $ map fst simult
 
 -- Give a duration to the last note, so that it last until the end of a mesure.
 lastNote :: RealFrac a => [a] -> [a]
