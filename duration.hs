@@ -51,7 +51,8 @@ instance Num Duration where
   -- These are required for Num instance, but have no meaning here.
   _ * _ = error "Multiplication has no meaning."
   signum _ = 1
-  abs = id
+  abs (Other x) = Other $ abs x
+  abs d         = d
 
   -- | A bijection is defined between durations and integers.
   fromInteger x
