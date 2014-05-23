@@ -1,4 +1,4 @@
-module Duration (Duration, fromFractional, isNote, duration, showNote) where
+module Duration (Duration, zero, fromFractional, isNote, duration, showNote) where
 
 import Data.Ratio (numerator)
 
@@ -82,6 +82,9 @@ instance Show Duration where
 ------------------------
 -- Exported functions --
 ------------------------
+
+zero :: Duration
+zero = Other 0
 
 -- | Tell if a duration is one of a regular note.
 isNote :: Duration -> Bool
