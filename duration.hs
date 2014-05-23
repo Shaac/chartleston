@@ -78,6 +78,12 @@ instance Fractional Duration where
 
   fromRational = fromFractional'
 
+instance Real Duration where
+  toRational = duration
+
+instance RealFrac Duration where
+  properFraction = properFraction . duration
+
 instance Show Duration where
   -- | Display the duration name in UK English.
   show (Basic (-3)) = "maxima"

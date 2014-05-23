@@ -68,12 +68,9 @@ join = mergeZeros (0, []) . (setZeros 0)
     mergeZeros x ((x1, x2):xs) = x : (mergeZeros (x1, [x2]) xs)
 
 -- Give a duration to the last note, so that it last until the end of a mesure.
-lastNote :: [Duration] -> [Duration]
-lastNote = aux 0
-  where
-    aux acc (x:xs) = x : (aux (duration x + acc) xs)
-    aux acc []     = [fromFractional $ 1 / (1 - dec)]
-      where dec = snd (properFraction acc :: (Integer, Rational))
+lastNote :: (RealFrac a) => [a] -> [a]
+lastNote xs = xs ++ [1 / (1 - dec)]
+      where dec = snd (properFraction (sum xs))
 
 -- Apply a function to the first item of a tuple.
 mapFst :: (a -> b) -> (a, c) -> (b, c)
