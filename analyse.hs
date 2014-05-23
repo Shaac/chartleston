@@ -61,14 +61,16 @@ equalise durations = zip (aux durations) durations
 
 -- Join notes that are close into simultaneous notes.
 join :: (Fractional a, Ord a) => [(a, b)] -> [(a, [b])]
-join []            = []
-join ((d, n) : xs) = (d + s, n : map snd simult) : join rest
+join = ((0, []) :) . aux
   where
-    (simult, after) = span ((< 0.05) . fst) xs
-    rest
-      | null after  = []
-      | otherwise   = mapFst (+ s) (head after) : tail after
-    s               = (/ 2) $ sum $ map fst simult
+    aux []            = []
+    aux ((d, n) : xs) = (d + s, n : map snd simult) : aux rest
+      where
+        (simult, after) = span ((< 0.05) . fst) xs
+        rest
+          | null after  = []
+          | otherwise   = mapFst (+ s) (head after) : tail after
+        s               = (/ 2) $ sum $ map fst simult
 
 -- Apply a function to the first item of a tuple.
 mapFst :: (a -> b) -> (a, c) -> (b, c)
