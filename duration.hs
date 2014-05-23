@@ -58,6 +58,9 @@ instance Num Duration where
     | x `mod` 2 == 0 = Basic (x `div` 2)
     | otherwise      = Dotted ((x + 1) `div` 2)
 
+instance Ord Duration where
+  a <= b = (duration a :: Rational) <= (duration b :: Rational)
+
 instance Show Duration where
   -- | Display the duration name in UK English.
   show (Basic (-3)) = "maxima"
