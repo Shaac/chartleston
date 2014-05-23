@@ -41,7 +41,7 @@ voice t = pretty . (map $ uncurry notes)
 notes :: Duration -> [Note] -> String
 notes d [ ] = showNote d ("r" ++)
 notes d [n] = showNote d (show' n)
-notes d  l  = showNote d (('<' : (unwords $ map show l) ++ ">") ++)
+notes d  l  = showNote d (('<' : (unwords $ map show l) ++ " >") ++)
 
 
 ---------------------
