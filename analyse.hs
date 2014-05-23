@@ -1,6 +1,7 @@
 module Analyse (analyse) where
 
-import Data.List (group, sort)
+import Data.List  (group, sort)
+import Data.Ratio (denominator)
 
 import Duration (Duration, fromFractional)
 
@@ -37,7 +38,20 @@ lastNote xs = xs ++ [1 - ((snd :: (Int, a) -> a) $ properFraction $ sum xs)]
 
 -- Use a simple but crude tempo detection. To be used after a pre-treatmnent.
 detect :: RealFrac a => [(a, a)] -> [Rational]
-detect = map (toRational . fromFractional) . (map fst)
+detect = map (toRational) . (aux 0 0) . map snd
+  where
+    aux _ _    []                = []
+    aux _ _    [x]               = [fromFractional x]
+    aux s prev (x : y : xs) = next : aux (s + next) next (y : xs)
+      where
+        next
+          | prev == x' && x' == y' = x'
+          | c (succ x') < c x'     = succ x'
+          | c (pred x') < c x'     = pred x'
+          | otherwise              = x'
+        x' = fromFractional x
+        y' = fromFractional y
+        c a = denominator $ toRational (a + s)
 
 -- Normalise the duration list so that it represents the fraction of a measure.
 normalise :: RealFrac a => [(a, a)] -> [(a, a)]
