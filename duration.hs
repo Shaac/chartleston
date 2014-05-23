@@ -1,4 +1,4 @@
-module Duration (Duration, zero, fromFractional, isNote, duration, showNote) where
+module Duration (Duration, fromFractional, isNote, duration, showNote) where
 
 import Data.Ratio (numerator)
 
@@ -42,8 +42,6 @@ instance Num Duration where
     | otherwise  = Other (duration a - duration b)
   a - b          = fromFractional' (duration a - duration b :: Rational)
 
-  negate = (Other 0 -)
-
   (Basic  x) * (Basic  y) = Basic  $ x + y
   (Basic  x) * (Dotted y) = Dotted $ x + y
   (Dotted x) * (Dotted y) = Dotted $ x + y - 1
@@ -59,10 +57,16 @@ instance Num Duration where
   abs (Other x) = Other $ abs x
   abs d         = d
 
-  -- | A bijection is defined between durations and integers.
-  fromInteger x
-    | x `mod` 2 == 0 = Basic (x `div` 2)
-    | otherwise      = Dotted ((x + 1) `div` 2)
+  fromInteger = fromFractional' . (fromInteger :: Integer -> Rational)
+
+instance Enum Duration where
+  toEnum i
+    | i `mod` 2 == 0 = Basic  $  toInteger i      `div` 2
+    | otherwise      = Dotted $ (toInteger i + 1) `div` 2
+
+  fromEnum (Basic  x) = fromInteger $ x * 2
+  fromEnum (Dotted x) = fromInteger $ x * 2 - 1
+  fromEnum _          = error "Other can not be an Enum."
 
 instance Ord Duration where
   a <= b = (duration a :: Rational) <= (duration b :: Rational)
@@ -96,9 +100,6 @@ instance Show Duration where
 -- Exported functions --
 ------------------------
 
-zero :: Duration
-zero = Other 0
-
 -- | Tell if a duration is one of a regular note.
 isNote :: Duration -> Bool
 isNote (Other _) = False
@@ -116,20 +117,20 @@ showNote n = const $ "R1 * " ++ (show $ (numerator $ duration n :: Integer))
 -- | Give the fraction of a measure corresponding to a Duration.
 duration :: Fractional a => Duration -> a
 duration (Basic  x) = 1 / 2 ^^ x
-duration (Dotted x) = 1 / 2 ^^ x + 1 / 2 ^^ (x + 1)
+duration (Dotted x) = 3 / 2 ^^ (x + 1)
 duration (Other  x) = fromRational x
 
 -- | Get the closest Duration corresponding to a fraction of a measure.
 fromFractional :: (Fractional a, Ord a, Real a) => a -> Duration
 fromFractional x
   | x <= 0    = Other (toRational x)
-  | x <= 1    = search succ 0
-  | otherwise = search pred 0
+  | x <= 1    = search succ 1
+  | otherwise = search pred 1
   where
     search next i
-      | diff i <= diff (next i) = fromInteger i
+      | diff i <= diff (next i) = toEnum i
       | otherwise               = search next $ next i
-    diff                        = abs . (subtract x) . duration . fromInteger
+    diff                        = abs . (subtract x) . duration . toEnum
 
 
 ---------------------
