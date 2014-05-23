@@ -2,7 +2,7 @@ module Analyse (analyse) where
 
 import Data.List (group, sort)
 
-import Duration (Duration, fromFractional, duration, zero)
+import Duration (Duration, fromFractional, duration)
 
 
 ------------------------
@@ -20,15 +20,15 @@ analyse = uncurry zip . (mapFst treat) . unzip . join
 -- Local functions --
 ---------------------
 
-mesures :: [Duration] -> [[Duration]]
+mesures :: (Num a, Ord a) => [a] -> [[a]]
 mesures [] = []
 mesures ds = h : mesures q
   where
-    (h, q)                    = sumWhile (<= fromInteger 0) zero ds
+    (h, q)                    = sumWhile (<= 1) 0 ds
     sumWhile _ _   []         = ([], [])
     sumWhile f acc l@(x : xs)
       | f (acc + x)           = mapFst (x :) $ sumWhile f (acc + x) xs
-      | otherwise             = (l, [])
+      | otherwise             = ([], l)
 
 -- Use a simple but crude tempo detection. To be used after a pre-treatmnent.
 detect :: (RealFrac a, Ord a) => [a] -> [Duration]
