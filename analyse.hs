@@ -13,7 +13,7 @@ import Duration (Duration, fromFractional, duration)
 analyse :: (RealFrac a, Ord a) => [(a, b)] -> [(Duration, [b])]
 analyse = uncurry zip . (mapFst treat) . unzip . join
   where
-    treat = lastNote . detect . equalise . (drop 1)
+    treat = lastNote . detect . normalise . equalise . drop 1
 
 
 ---------------------
@@ -31,15 +31,18 @@ mesures ds = h : mesures q
       | otherwise             = ([], l)
 
 -- Use a simple but crude tempo detection. To be used after a pre-treatmnent.
-detect :: (RealFrac a, Ord a) => [a] -> [Duration]
-detect xs = map (fromFractional . (/ norm)) xs
+detect :: RealFrac a => [a] -> [Duration]
+detect = map fromFractional
+
+-- Normalise the duration list so that it represents the fraction of a measure.
+normalise :: RealFrac a => [a] -> [a]
+normalise xs = map (/ norm) xs
   where
     norm     = let x = majority xs in x * fromInteger (closest $ 3 / x)
     majority = snd . maximum . (map (\x -> (length x, head x))) . group . sort
     closest x
       | x <= 2    = max 1 $ round x
       | otherwise = 2 * (closest (x / 2))
-
 
 -- Equalise an integer list: close values next to each other are leveled.
 equalise :: (Fractional a, Ord a) => [a] -> [a]
