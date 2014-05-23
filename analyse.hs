@@ -31,6 +31,10 @@ mesures ds = h : mesures q
       | otherwise             = if add x acc then ([x], xs) else ([], l)
     add note measure          = abs (1 - (note + measure)) < abs (1 - measure)
 
+-- Give a duration to last note, so that it lasts until the end of a mesure.
+lastNote :: RealFrac a => [a] -> [a]
+lastNote xs = xs ++ [1 - ((snd :: (Int, a) -> a) $ properFraction $ sum xs)]
+
 -- Use a simple but crude tempo detection. To be used after a pre-treatmnent.
 detect :: RealFrac a => [(a, a)] -> [Rational]
 detect = map (toRational . fromFractional) . (map fst)
@@ -66,11 +70,6 @@ join ((d, n) : xs) = (d + s, n : map snd simult) : join rest
       | null after  = []
       | otherwise   = mapFst (+ s) (head after) : tail after
     s               = (/ 2) $ sum $ map fst simult
-
--- Give a duration to the last note, so that it last until the end of a mesure.
-lastNote :: RealFrac a => [a] -> [a]
-lastNote xs = xs ++ [1 - dec]
-      where dec = snd (properFraction (sum xs))
 
 -- Apply a function to the first item of a tuple.
 mapFst :: (a -> b) -> (a, c) -> (b, c)
