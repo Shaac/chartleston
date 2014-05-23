@@ -32,23 +32,26 @@ mesures ds = h : mesures q
     add note measure          = abs (1 - (note + measure)) < abs (1 - measure)
 
 -- Use a simple but crude tempo detection. To be used after a pre-treatmnent.
-detect :: RealFrac a => [a] -> [Rational]
-detect = map (toRational . fromFractional)
+detect :: RealFrac a => [(a, a)] -> [Rational]
+detect = map (toRational . fromFractional) . (map fst)
 
 -- Normalise the duration list so that it represents the fraction of a measure.
-normalise :: RealFrac a => [a] -> [a]
-normalise xs = map (/ norm) xs
+normalise :: RealFrac a => [(a, a)] -> [(a, a)]
+normalise xs = map (\(a, b) -> (a / norm, b / norm)) xs
   where
-    norm     = let x = majority xs in x * fromInteger (closest $ 3 / x)
+    norm     = let x = majority (map fst xs) in x * fromInteger (closest $ 3 / x)
     majority = snd . maximum . (map (\x -> (length x, head x))) . group . sort
     closest x
       | x <= 2    = max 1 $ round x
       | otherwise = 2 * (closest (x / 2))
 
+equalise :: (Fractional a, Ord a) => [a] -> [(a, a)]
+equalise xs = zip (equalise' xs) xs
+
 -- Equalise an integer list: close values next to each other are leveled.
-equalise :: (Fractional a, Ord a) => [a] -> [a]
-equalise []  = []
-equalise xs  = let (similar, rest) = cut xs in level similar ++ (equalise rest)
+equalise' :: (Fractional a, Ord a) => [a] -> [a]
+equalise' []  = []
+equalise' xs  = let (similar, rest) = cut xs in level similar ++ (equalise' rest)
   where
     cut l   = span ((< 0.2) . abs . (1 -) . (/ (head l))) l
     level l = let s = length l in replicate s $ sum l / (fromIntegral s)
