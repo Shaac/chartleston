@@ -48,9 +48,20 @@ instance Num Duration where
     | otherwise                        = Other (d)
     where d = duration a - duration b
 
-  -- These are required for Num instance, but have no meaning here.
-  _ * _ = error "Multiplication has no meaning."
-  signum _ = 1
+  negate = (Other 0 -)
+
+  (Basic  x) * (Basic  y) = Basic  $ x + y
+  (Basic  x) * (Dotted y) = Dotted $ x + y
+  (Dotted x) * (Dotted y) = Dotted $ x + y - 1
+  (Other  x) * d          = Other (x + duration d) + Other 0 -- Check if basic.
+  a          * b          = b * a
+
+  signum (Other x)
+    | x == 0       = Other 0
+    | x >  0       = Basic 0
+    | x <  0       = Other $ - 1
+  signum _         = Basic 0
+
   abs (Other x) = Other $ abs x
   abs d         = d
 
@@ -61,6 +72,13 @@ instance Num Duration where
 
 instance Ord Duration where
   a <= b = (duration a :: Rational) <= (duration b :: Rational)
+
+instance Fractional Duration where
+  recip   (Basic  x) = Basic $ - x
+  recip n@(Dotted _) = Other $ recip $ duration n
+  recip   (Other  x) = Other (recip x) + Other 0 -- Check if real note now.
+
+  fromRational = (Other 0 +) . Other
 
 instance Show Duration where
   -- | Display the duration name in UK English.
