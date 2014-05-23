@@ -28,7 +28,8 @@ mesures ds = h : mesures q
     sumWhile _ _   []         = ([], [])
     sumWhile f acc l@(x : xs)
       | f (acc + x)           = mapFst (x :) $ sumWhile f (acc + x) xs
-      | otherwise             = ([], l)
+      | otherwise             = if add x acc then ([x], xs) else ([], l)
+    add note measure          = abs (1 - (note + measure)) < abs (1 - measure)
 
 -- Use a simple but crude tempo detection. To be used after a pre-treatmnent.
 detect :: RealFrac a => [a] -> [Duration]
