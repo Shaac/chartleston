@@ -43,20 +43,19 @@ detect = map (toRational . fromFractional) . (map fst)
 normalise :: RealFrac a => [(a, a)] -> [(a, a)]
 normalise xs = map (\(a, b) -> (a / norm, b / norm)) xs
   where
-    norm     = let x = majority (map fst xs) in x * fromInteger (closest $ 3 / x)
+    norm     = let x = majority (map fst xs) in x * (closest $ 3 / x)
     majority = snd . maximum . (map (\x -> (length x, head x))) . group . sort
     closest x
-      | x <= 2    = max 1 $ round x
+      | x <= 2    = max 1 $ fromInteger $ round x
       | otherwise = 2 * (closest (x / 2))
 
-equalise :: (Fractional a, Ord a) => [a] -> [(a, a)]
-equalise xs = zip (equalise' xs) xs
-
 -- Equalise an integer list: close values next to each other are leveled.
-equalise' :: (Fractional a, Ord a) => [a] -> [a]
-equalise' []  = []
-equalise' xs  = let (similar, rest) = cut xs in level similar ++ (equalise' rest)
+-- The original values are kept aside.
+equalise :: (Fractional a, Ord a) => [a] -> [(a, a)]
+equalise durations = zip (aux durations) durations
   where
+    aux []  = []
+    aux xs  = let (similar, rest) = cut xs in level similar ++ (aux rest)
     cut l   = span ((< 0.2) . abs . (1 -) . (/ (head l))) l
     level l = let s = length l in replicate s $ sum l / (fromIntegral s)
 
