@@ -11,7 +11,7 @@ import Duration (Duration, fromFractional)
 
 -- | Analyse a list of real notes and organise them with regular durations.
 analyse :: (RealFrac a, Ord a) => [(a, b)] -> [(Duration, [b])]
-analyse = uncurry zip . (mapFst treat) . unzip . join
+analyse = uncurry zip . (mapFst $ map fromFractional . treat) . unzip . join
   where
     treat = lastNote . detect . normalise . equalise . drop 1
 
@@ -32,8 +32,8 @@ mesures ds = h : mesures q
     add note measure          = abs (1 - (note + measure)) < abs (1 - measure)
 
 -- Use a simple but crude tempo detection. To be used after a pre-treatmnent.
-detect :: RealFrac a => [a] -> [Duration]
-detect = map fromFractional
+detect :: RealFrac a => [a] -> [Rational]
+detect = map (toRational . fromFractional)
 
 -- Normalise the duration list so that it represents the fraction of a measure.
 normalise :: RealFrac a => [a] -> [a]
@@ -68,12 +68,9 @@ join = mergeZeros (0, []) . (setZeros 0)
     mergeZeros x ((x1, x2):xs) = x : (mergeZeros (x1, [x2]) xs)
 
 -- Give a duration to the last note, so that it last until the end of a mesure.
-lastNote :: [Duration] -> [Duration]
-lastNote = aux 0
-  where
-    aux acc (x:xs) = x : (aux (toRational x + acc) xs)
-    aux acc []     = [fromFractional $ 1 / (1 - dec)]
-      where dec = snd (properFraction acc :: (Integer, Rational))
+lastNote :: RealFrac a => [a] -> [a]
+lastNote xs = xs ++ [1 - dec]
+      where dec = snd (properFraction (sum xs))
 
 -- Apply a function to the first item of a tuple.
 mapFst :: (a -> b) -> (a, c) -> (b, c)
