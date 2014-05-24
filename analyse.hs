@@ -47,8 +47,6 @@ detect = map (toRational) . (aux 0 0) . map snd
           | prev == x' && x' == y'           = x'
           | prev == succ x' && succ x' == y' = succ x'
           | prev == pred x' && pred x' == y' = pred x'
-          | c (succ x') < c x'               = succ x'
-          | c (pred x') < c x'               = pred x'
           | otherwise                        = x'
         x' = fromFractional x
         y' = fromFractional y
