@@ -24,6 +24,7 @@ analyse = uncurry zip . (mapFst $ map fromFractional . treat) . unzip . join
 lastNote :: RealFrac a => [a] -> [a]
 lastNote xs = xs ++ [1 - ((snd :: (Int, a) -> a) $ properFraction $ sum xs)]
 
+-- Detect the notes durations.
 detect :: RealFrac a => [(a, a)] -> [Rational]
 detect = map (toRational) . (aux 0) . map snd
   where
@@ -63,7 +64,9 @@ equalise durations = zip (aux durations) durations
 join :: (Fractional a, Ord a) => [(a, b)] -> [(a, [b])]
 join = first . aux
   where
-    first xs          = if null (takeWhile ((> 0.05) . fst) xs) then xs else (0, []) : xs
+    first xs
+      | null (takeWhile ((> 0.5) . fst) xs) = xs
+      | otherwise                            = (0, []) : xs
     aux []            = []
     aux ((d, n) : xs) = (d + s, n : map snd simult) : aux rest
       where
