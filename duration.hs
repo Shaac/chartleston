@@ -61,11 +61,16 @@ instance Num Duration where
 
 instance Enum Duration where
   toEnum i
-    | i `mod` 2 == 0 = Basic  $  toInteger i      `div` 2
-    | otherwise      = Dotted $ (toInteger i + 1) `div` 2
+    | i < 7 && i `mod` 2 == 0 = Basic  $  toInteger i      `div` 2
+    | i < 7                   = Dotted $ (toInteger i + 1) `div` 2
+    | otherwise               = Basic $ toInteger $ i - 3
 
-  fromEnum (Basic  x) = fromInteger $ x * 2
-  fromEnum (Dotted x) = fromInteger $ x * 2 - 1
+  fromEnum (Basic  x)
+    | x < 4     = fromInteger $ x * 2
+    | otherwise = fromInteger $ x + 3
+  fromEnum (Dotted x)
+    | x < 4     = fromInteger $ x * 2 - 1
+    | otherwise = error "Such small dotted can not be an Enum."
   fromEnum _          = error "Other can not be an Enum."
 
 instance Ord Duration where
