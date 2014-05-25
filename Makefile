@@ -1,5 +1,6 @@
 TARGET = chartleston
 SRC = $(wildcard src/*.hs)
+GHCFLAGS = -Wall -Werror -O
 
 all: $(TARGET)
 
@@ -9,6 +10,6 @@ clean:
 	rm -f $(TARGET)
 
 $(TARGET): $(SRC)
-	ghc --make -Wall $^ -o $(TARGET)
+	ghc --make $(GHCFLAGS) $^ -o $@
 
 .PHONY: all clean
