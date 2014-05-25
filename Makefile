@@ -12,4 +12,10 @@ clean:
 $(TARGET): $(SRC)
 	ghc --make $(GHCFLAGS) $^ -o $@
 
+%.pdf: %.ly
+	lilypond $<
+
+%.ly: $(TARGET) samples/%.midi
+	./$^
+
 .PHONY: all clean
