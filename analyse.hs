@@ -80,7 +80,7 @@ join = first . aux
     aux []            = []
     aux ((d, n) : xs) = (d + s, n : map snd simult) : aux rest
       where
-        (simult, after) = span ((< 0.05) . fst) xs
+        (simult, after) = span ((< 0.075) . fst) xs
         rest
           | null after  = []
           | otherwise   = mapFst (+ s) (head after) : tail after
