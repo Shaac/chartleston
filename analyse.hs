@@ -1,7 +1,6 @@
 module Analyse (analyse) where
 
 import Data.List  (group, sort)
-import Data.Ratio (denominator)
 
 import Duration (Duration, fromFractional)
 
@@ -21,27 +20,16 @@ analyse = uncurry zip . (mapFst $ map fromFractional . treat) . unzip . join
 -- Local functions --
 ---------------------
 
-mesures :: (Num a, Ord a) => [a] -> [[a]]
-mesures [] = []
-mesures ds = h : mesures q
-  where
-    (h, q)                    = sumWhile (<= 1) 0 ds
-    sumWhile _ _   []         = ([], [])
-    sumWhile f acc l@(x : xs)
-      | f (acc + x)           = mapFst (x :) $ sumWhile f (acc + x) xs
-      | otherwise             = if add x acc then ([x], xs) else ([], l)
-    add note measure          = abs (1 - (note + measure)) < abs (1 - measure)
-
 -- Give a duration to last note, so that it lasts until the end of a mesure.
 lastNote :: RealFrac a => [a] -> [a]
 lastNote xs = xs ++ [1 - ((snd :: (Int, a) -> a) $ properFraction $ sum xs)]
 
 detect :: RealFrac a => [(a, a)] -> [Rational]
-detect = map (toRational) . (aux 0 0) . map snd
+detect = map (toRational) . (aux 0) . map snd
   where
-    aux _ _    []                = []
-    aux _ _    [x]               = [fromFractional x]
-    aux s prev (x : y : xs) = next : aux (s + next) next (y : xs)
+    aux _    []                = []
+    aux _    [x]               = [fromFractional x]
+    aux prev (x : y : xs) = next : aux next (y : xs)
       where
         next
           | prev == x' && x' == y'           = x'
@@ -50,7 +38,6 @@ detect = map (toRational) . (aux 0 0) . map snd
           | otherwise                        = x'
         x' = fromFractional x
         y' = fromFractional y
-        c a = denominator $ toRational (a + s)
 
 -- Normalise the duration list so that it represents the fraction of a measure.
 normalise :: RealFrac a => [(a, a)] -> [(a, a)]
