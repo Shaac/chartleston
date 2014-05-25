@@ -97,4 +97,4 @@ instrument 78 = "cuim"  -- Mute Cuíca
 instrument 79 = "cuio"  -- Open Cuíca
 instrument 80 = "trim"  -- Mute Triangle
 instrument 81 = "trio"  -- Open Triangle
-instrument _  = "tt" -- Phony instrument, so that in case of error it can compile
+instrument _  = "tt" -- Phony; so that in case of error it can compile
