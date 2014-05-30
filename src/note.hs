@@ -26,7 +26,7 @@ fromPair :: (Int, Int) -> Note
 fromPair = Note
 
 isCymbal :: Note -> Bool
-isCymbal = flip elem [42, 46, 49, 51, 52, 53, 55, 57, 59] . pitch
+isCymbal = flip elem [26, 42, 46, 49, 51, 52, 53, 55, 57, 59] . pitch
 
 isTom :: Note -> Bool
 isTom = flip elem [37, 38, 40, 41, 43, 45, 47, 48, 50] . pitch
@@ -61,7 +61,7 @@ instrument 42 = "hh"    -- Closed Hi-hat
 instrument 43 = "tomfh" -- Low Tom 1
 instrument 44 = "hhp"   -- Pedal Hi-hat
 instrument 45 = "tomml" -- Mid Tom 2
-instrument 46 = "hho"   -- Open Hi-hat
+instrument 46 = "hhho"  -- Open Hi-hat; TD15 half open
 instrument 47 = "toml"  -- Mid Tom 1
 instrument 48 = "tommh" -- High Tom 2
 instrument 49 = "cymc"  -- Crash Cymbal 1
@@ -97,4 +97,5 @@ instrument 78 = "cuim"  -- Mute Cuíca
 instrument 79 = "cuio"  -- Open Cuíca
 instrument 80 = "trim"  -- Mute Triangle
 instrument 81 = "trio"  -- Open Triangle
+instrument 26 = "hho"   -- TD15 open hi-hat
 instrument _  = "tt" -- Phony; so that in case of error it can compile
