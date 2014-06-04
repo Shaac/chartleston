@@ -2,6 +2,7 @@ module Write (write) where
 
 import Duration (Duration, showNote)
 import Note     (Note, show')
+import Score    (Score, title, score)
 
 
 ------------------------
@@ -9,8 +10,10 @@ import Note     (Note, show')
 ------------------------
 
 -- | Write the music in Lilypond format.
-write :: [([(Duration, [Note])], [(Duration, [Note])])] -> String
-write = (prefix ++) . (++ suffix) . (concatMap $ uncurry voices)
+write :: Score [([(Duration, [Note])], [(Duration, [Note])])] -> String
+write s = text $ score s
+  where
+    text = (prefix (title s) ++) . (++ suffix) . (concatMap $ uncurry voices)
 
 
 ---------------------
@@ -49,8 +52,8 @@ notes d  l  = showNote d (('<' : (unwords $ map show l) ++ " >") ++)
 ---------------------
 
 -- The beginning of the lilypond file.
-prefix :: String
-prefix = unlines [
+prefix :: String -> String
+prefix title' = unlines [
   "\\version \"2.16.0\"",
   "",
   "#(define td15",
@@ -75,6 +78,10 @@ prefix = unlines [
   "     (bassdrum       default   #f          -3) ; Bass drum.",
   "     (pedalhihat     cross     #f          -5) ; Hi-hat pedal.",
   "     ))",
+  "",
+  "\\header {",
+  "    title = \"" ++ title' ++ "\"",
+  "}",
   "",
   "\\new DrumStaff <<",
   "    \\override Staff.TimeSignature #'style = #'() % Display 4/4 signature.",

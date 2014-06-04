@@ -3,6 +3,7 @@ import System.Environment (getArgs)
 
 import Analyse   (analyse)
 import Midi      (open)
+import Score     (Score (Score))
 import Structure (structure)
 import Write     (write)
 
@@ -21,8 +22,9 @@ main = do
     putStrLn $ show $ analyse $ midi
     putStrLn $ show $ structure $ analyse $ midi
   else do
-    let title = name args
-    writeFile (title ++ ".ly") $ write $ structure $ analyse $ midi
+    let title' = name args
+    writeFile (title' ++ ".ly") $
+      write $ fmap structure $ fmap analyse $ Score title' midi
 
 
 ---------------------
