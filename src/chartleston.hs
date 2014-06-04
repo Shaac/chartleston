@@ -20,8 +20,9 @@ main = do
     putStrLn $ show $ midi
     putStrLn $ show $ analyse $ midi
     putStrLn $ show $ structure $ analyse $ midi
-  else
-    writeFile (output args) $ write $ structure $ analyse $ midi
+  else do
+    let title = name args
+    writeFile (title ++ ".ly") $ write $ structure $ analyse $ midi
 
 
 ---------------------
@@ -36,14 +37,14 @@ arg (x:xs)   s
   | x == '-' : s = head xs
   | otherwise    = arg xs s
 
--- Get the output filename.
-output :: [String] -> String
-output args = if param /= "" then param else ly "" (args !! 0)
+-- Get the filename.
+name :: [String] -> String
+name args = if null outputname then inputname "" (args !! 0) else outputname
   where
-    param   = arg args "o"
-    ly acc []       = acc ++ ".ly"
-    ly _   ('/':xs) = ly "" xs
-    ly acc (x:xs)
-      | x == '.' && map toUpper xs == "MID"  = acc ++ ".ly"
-      | x == '.' && map toUpper xs == "MIDI" = acc ++ ".ly"
-      | otherwise                            = ly (acc ++ [x]) xs
+    outputname             = arg args "o"
+    inputname acc []       = acc
+    inputname _   ('/':xs) = inputname "" xs
+    inputname acc (x:xs)
+      | x == '.' && map toUpper xs == "MID"  = acc
+      | x == '.' && map toUpper xs == "MIDI" = acc
+      | otherwise                            = inputname (acc ++ [x]) xs
