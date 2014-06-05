@@ -1,4 +1,4 @@
-module Duration (Duration, fromFractional, isNote, showNote) where
+module Duration (Duration, fromFractional, guess, isNote, showNote) where
 
 import Data.Ratio (numerator)
 
@@ -137,6 +137,11 @@ fromFractional x
       | otherwise               = search next $ next i
     diff                        = abs . (subtract x) . duration
 
+guess :: (Fractional a, Ord a, Real a) => a -> [(Duration, a)]
+guess time = [err (pred closest), err closest, err (succ closest)]
+  where
+    closest = fromFractional time
+    err d   = (d, abs $ 1 - (time / (duration d)))
 
 ---------------------
 -- Local functions --
