@@ -2,7 +2,7 @@ module Analyse (analyse) where
 
 import Data.List  (group, sort)
 
-import Duration (Duration, fromFractional)
+import Duration (Duration, fromFractional, guess, bestGuess)
 
 
 ------------------------
@@ -26,19 +26,7 @@ lastNote xs = xs ++ [1 - ((snd :: (Int, a) -> a) $ properFraction $ sum xs)]
 
 -- Detect the notes durations.
 detect :: RealFrac a => [(a, a)] -> [Rational]
-detect = map (toRational) . (aux 0) . map snd
-  where
-    aux _    []                = []
-    aux _    [x]               = [fromFractional x]
-    aux prev (x : y : xs) = next : aux next (y : xs)
-      where
-        next
-          | prev == x' && x' == y'           = x'
-          | prev == succ x' && succ x' == y' = succ x'
-          | prev == pred x' && pred x' == y' = pred x'
-          | otherwise                        = x'
-        x' = fromFractional x
-        y' = fromFractional y
+detect = map (toRational) . bestGuess . foldr guess [] . map snd
 
 -- Normalise the duration list so that it represents the fraction of a measure.
 normalise :: RealFrac a => [(a, a)] -> [(a, a)]
