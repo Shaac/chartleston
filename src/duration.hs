@@ -1,6 +1,6 @@
-module Duration (Duration, fromFractional, guess, isNote, showNote,
-PossibleDuration(..)) where
+module Duration (Duration, fromFractional, guess, isNote, showNote) where
 
+import Data.List  (sort)
 import Data.Ratio (numerator)
 
 ---------------
@@ -153,7 +153,18 @@ guess' time = [struct (pred closest), struct closest, struct (succ closest)]
 
 guess :: (Fractional a, Ord a, Real a) =>
     a -> [[PossibleDuration]] -> [[PossibleDuration]]
-guess = map . (flip (++) . guess')
+guess = (keep .) . map . (flip (++) . guess')
+  where
+    keep       = (map snd) . (take 3) . reverse . sort . (map compute)
+    compute xs = (fold err xs * err' xs, xs)
+    err'    xs = toRational $ abs $ 1 - (fold original xs / fold (duration . value) xs)
+    fold f  xs = foldr ((+) . f) 0 xs
+
+instance Eq PossibleDuration where
+  a == b = original a == original b
+
+instance Ord PossibleDuration where
+  a <= b = original a <= original b
 
 ---------------------
 -- Local functions --
