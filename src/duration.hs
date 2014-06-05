@@ -160,7 +160,7 @@ bestGuess :: [[PossibleDuration]] -> [Duration]
 bestGuess = map value . head . keep 1
 
 keep :: Int -> [[PossibleDuration]] -> [[PossibleDuration]]
-keep n = (map snd) . (take n) . reverse . sort . (map compute)
+keep n = (map snd) . (take n) . sort . (map compute)
   where
     compute xs = (fold err xs * err' xs, xs)
     err'    xs = toRational $ abs $ 1 - (fold original xs / fold (duration . value) xs)
