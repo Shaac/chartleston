@@ -154,7 +154,7 @@ guess' time = [struct (pred closest), struct closest, struct (succ closest)]
 
 guess :: (Fractional a, Ord a, Real a) =>
     a -> [[PossibleDuration]] -> [[PossibleDuration]]
-guess t = keep 3 . concatMap (flip map g . (++))
+guess t = keep 3 . concatMap (flip map g . (flip (++)))
   where g = map (: []) (guess' t)
 
 bestGuess :: [[PossibleDuration]] -> [Duration]
