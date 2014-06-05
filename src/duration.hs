@@ -165,7 +165,8 @@ erro a b = toRational $ abs $ 1 - (a / b)
 keep :: Int -> [[PossibleDuration]] -> [[PossibleDuration]]
 keep n = (map snd) . (take n) . sort . (map compute)
   where
-    compute xs = (fold err xs * err' xs, xs)
+    small   xs = take (min 5 (length xs)) xs
+    compute xs = (fold err (small xs) * err' (small xs), xs)
     err'    xs = erro (fold original xs) $ fold (duration . value) xs
     fold f  xs = foldr ((+) . f) 0 xs
 
