@@ -149,8 +149,7 @@ guess' :: (Fractional a, Ord a, Real a) => a -> [PossibleDuration]
 guess' time = [struct (pred closest), struct closest, struct (succ closest)]
   where
     closest  = fromFractional time
-    struct d = PossibleDuration d (toRational time) $
-                 toRational $ abs $ 1 - (time / (duration d))
+    struct d = PossibleDuration d (toRational time) $ erro time $ duration d
 
 guess :: (Fractional a, Ord a, Real a) =>
     a -> [[PossibleDuration]] -> [[PossibleDuration]]
@@ -160,11 +159,14 @@ guess t = keep 3 . concatMap (flip map g . (flip (++)))
 bestGuess :: [[PossibleDuration]] -> [Duration]
 bestGuess = map value . head . keep 1
 
+erro :: (Fractional a, Real a) => a -> a -> Rational
+erro a b = toRational $ abs $ 1 - (a / b)
+
 keep :: Int -> [[PossibleDuration]] -> [[PossibleDuration]]
 keep n = (map snd) . (take n) . sort . (map compute)
   where
     compute xs = (fold err xs * err' xs, xs)
-    err'    xs = toRational $ abs $ 1 - (fold original xs / fold (duration . value) xs)
+    err'    xs = erro (fold original xs) $ fold (duration . value) xs
     fold f  xs = foldr ((+) . f) 0 xs
 
 
