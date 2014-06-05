@@ -144,12 +144,16 @@ fromFractional x
       | otherwise               = search next $ next i
     diff                        = abs . (subtract x) . duration
 
-guess :: (Fractional a, Ord a, Real a) => a -> [PossibleDuration]
-guess time = [struct (pred closest), struct closest, struct (succ closest)]
+guess' :: (Fractional a, Ord a, Real a) => a -> [PossibleDuration]
+guess' time = [struct (pred closest), struct closest, struct (succ closest)]
   where
     closest  = fromFractional time
     struct d = PossibleDuration d (toRational time) $
                  toRational $ abs $ 1 - (time / (duration d))
+
+guess :: (Fractional a, Ord a, Real a) =>
+    a -> [[PossibleDuration]] -> [[PossibleDuration]]
+guess = map . (flip (++) . guess')
 
 ---------------------
 -- Local functions --
