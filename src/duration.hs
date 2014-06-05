@@ -1,4 +1,5 @@
-module Duration (Duration, fromFractional, guess, isNote, showNote) where
+module Duration (Duration, fromFractional, guess, isNote, showNote,
+PossibleDuration(..)) where
 
 import Data.Ratio (numerator)
 
@@ -9,6 +10,12 @@ import Data.Ratio (numerator)
 -- Basic: The note length is 1 / 2^n of that of the measure.
 -- Dotted: The note lengt is 1.5 times that of a basic note.
 data Duration = Basic Integer | Dotted Integer | Other Rational deriving Eq
+
+data PossibleDuration = PossibleDuration {
+    value    :: Duration,
+    original :: Rational,
+    err      :: Rational
+}
 
 instance Num Duration where
   -- | Two notes can be added if the sum is a regular note.
@@ -137,11 +144,12 @@ fromFractional x
       | otherwise               = search next $ next i
     diff                        = abs . (subtract x) . duration
 
-guess :: (Fractional a, Ord a, Real a) => a -> [(Duration, a)]
-guess time = [err (pred closest), err closest, err (succ closest)]
+guess :: (Fractional a, Ord a, Real a) => a -> [PossibleDuration]
+guess time = [struct (pred closest), struct closest, struct (succ closest)]
   where
-    closest = fromFractional time
-    err d   = (d, abs $ 1 - (time / (duration d)))
+    closest  = fromFractional time
+    struct d = PossibleDuration d (toRational time) $
+                 toRational $ abs $ 1 - (time / (duration d))
 
 ---------------------
 -- Local functions --
