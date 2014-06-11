@@ -2,6 +2,7 @@ module Duration (Duration, fromFractional, guess, bestGuess, isNote, showNote)
   where
 
 import Data.List  (sort)
+import Data.Maybe (mapMaybe)
 import Data.Ratio (numerator)
 
 ---------------
@@ -163,11 +164,14 @@ erro :: (Fractional a, Real a) => a -> a -> Rational
 erro a b = toRational $ abs $ 1 - (a / b)
 
 keep :: Int -> [[PossibleDuration]] -> [[PossibleDuration]]
-keep n = (map snd) . (take n) . sort . (map compute)
+keep n = (map snd) . (take n) . sort . (map compute) . (mapMaybe remove)
   where
-    compute xs = (fold err xs * err' xs, xs)
-    err'    xs = erro (fold original xs) $ fold (duration . value) xs
-    fold f  xs = foldr ((+) . f) 0 xs
+    compute xs     = (fold err xs * err' xs, xs)
+    err'    xs     = erro (fold original xs) $ fold (duration . value) xs
+    fold f  xs     = foldr ((+) . f) 0 xs
+    remove  xs     = if begin 0 xs > 0.25 then Nothing else Just xs
+    begin a []     = a
+    begin a (x:xs) = if a >= (0.25 :: Rational) then a else begin (a + (duration $ value $ x)) xs
 
 
 
