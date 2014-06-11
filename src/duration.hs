@@ -5,6 +5,11 @@ import Data.List  (sort)
 import Data.Maybe (mapMaybe)
 import Data.Ratio (numerator)
 
+import System.IO.Unsafe
+
+debug :: Show a => a -> a
+debug x = unsafePerformIO (print x) `seq` x
+
 ---------------
 -- Structure --
 ---------------
@@ -17,7 +22,7 @@ data PossibleDuration = PossibleDuration {
     value    :: Duration,
     original :: Rational,
     err      :: Rational
-}
+} deriving Show
 
 instance Num Duration where
   -- | Two notes can be added if the sum is a regular note.
@@ -154,7 +159,7 @@ guess' time = [struct (pred closest), struct closest, struct (succ closest)]
 
 guess :: (Fractional a, Ord a, Real a) =>
     a -> [[PossibleDuration]] -> [[PossibleDuration]]
-guess t = keep 3 . concatMap (flip map g . (flip (++)))
+guess t = debug . keep 3 . concatMap (flip map g . (flip (++)))
   where g = map (: []) (guess' t)
 
 bestGuess :: [[PossibleDuration]] -> [Duration]
@@ -169,9 +174,10 @@ keep n = (map snd) . (take n) . sort . (map compute) . (mapMaybe remove)
     compute xs     = (fold err xs * err' xs, xs)
     err'    xs     = erro (fold original xs) $ fold (duration . value) xs
     fold f  xs     = foldr ((+) . f) 0 xs
-    remove  xs     = if begin 0 xs > 0.25 then Nothing else Just xs
-    begin a []     = a
-    begin a (x:xs) = if a >= (0.25 :: Rational) then a else begin (a + (duration $ value $ x)) xs
+    remove  xs     = if fold (duration . value) xs < (0.25 :: Rational) then Just xs else
+                       if begin 0 xs then Just xs else Nothing
+    begin a []     = a == (0.25 :: Rational)
+    begin a (x:xs) = if a == (0.25 :: Rational) then True else begin (a + (duration $ value $ x)) xs
 
 
 
