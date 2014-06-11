@@ -174,10 +174,11 @@ keep n = (map snd) . (take n) . sort . (map compute) . (mapMaybe remove)
     compute xs     = (fold err xs * err' xs, xs)
     err'    xs     = erro (fold original xs) $ fold (duration . value) xs
     fold f  xs     = foldr ((+) . f) 0 xs
-    remove  xs     = if fold (duration . value) xs < (0.25 :: Rational) then Just xs else
-                       if begin 0 xs then Just xs else Nothing
-    begin a []     = a == (0.25 :: Rational)
-    begin a (x:xs) = if a == (0.25 :: Rational) then True else begin (a + (duration $ value $ x)) xs
+    remove  xs     = if begin 0 xs then Just xs else Nothing
+    begin a []     = a <= (0.25 :: Rational)
+    begin a (x:xs)
+      | a == 0.25 = begin 0 (x:xs)
+      | otherwise = begin (a + (duration $ value $ x)) xs
 
 
 
