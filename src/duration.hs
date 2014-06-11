@@ -5,11 +5,6 @@ import Data.List  (sort)
 import Data.Maybe (mapMaybe)
 import Data.Ratio (numerator)
 
-import System.IO.Unsafe
-
-debug :: Show a => a -> a
-debug x = unsafePerformIO (print x) `seq` x
-
 ---------------
 -- Structure --
 ---------------
@@ -22,7 +17,7 @@ data PossibleDuration = PossibleDuration {
     value    :: Duration,
     original :: Rational,
     err      :: Rational
-} deriving Show
+}
 
 instance Num Duration where
   -- | Two notes can be added if the sum is a regular note.
@@ -159,7 +154,7 @@ guess' time = [struct (pred closest), struct closest, struct (succ closest)]
 
 guess :: (Fractional a, Ord a, Real a) =>
     a -> [[PossibleDuration]] -> [[PossibleDuration]]
-guess t = debug . keep 3 . concatMap (flip map g . (++))
+guess t = keep 3 . concatMap (flip map g . (++))
   where g = map (: []) (guess' t)
 
 bestGuess :: [[PossibleDuration]] -> [Duration]
