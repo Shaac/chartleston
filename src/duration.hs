@@ -168,15 +168,13 @@ closest x
       | otherwise               = search next $ next i
     diff                        = abs . (subtract x) . duration
 
-guessOne :: (Fractional a, Ord a, Real a) => a -> [PossibleDuration]
-guessOne time = map possible $ take 3 [pred (closest time)..]
-  where
-    possible d = PossibleDuration d (toRational time) $ erro time $ duration d
-
 guessNext :: (Fractional a, Ord a, Real a) =>
-    a -> [PossibleDurations] -> [PossibleDurations]
-guessNext t = keep 3 . concatMap (flip add (guessOne t))
-  where add x = map (PossibleDurations (ok x) 0 . (current x ++) . (: []))
+  a -> [PossibleDurations] -> [PossibleDurations]
+guessNext = (keep 3 .) . concatMap . flip add . guessOne
+  where
+    add x         = map (PossibleDurations (ok x) 0 . (current x ++) . (: []))
+    guessOne time = map (possible time) $ take 3 [pred (closest time)..]
+    possible t d  = PossibleDuration d (toRational t) $ erro t $ duration d
 
 erro :: (Fractional a, Real a) => a -> a -> Rational
 erro _ 0 = 0
