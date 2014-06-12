@@ -6,6 +6,8 @@ import Data.List  (sort)
 import Data.Maybe (mapMaybe)
 import Data.Ratio (numerator)
 
+import Control.Monad (liftM)
+
 ---------------
 -- Structure --
 ---------------
@@ -18,12 +20,12 @@ data PossibleDuration = PossibleDuration {
     value    :: Duration,
     original :: Rational,
     err      :: Rational
-}
+} deriving Show
 
 data PossibleDurations = PossibleDurations {
     ok      :: [PossibleDuration],
     current :: [PossibleDuration]
-}
+} deriving Show
 
 empty :: PossibleDurations
 empty = PossibleDurations [] []
@@ -172,6 +174,7 @@ bestGuess :: [PossibleDurations] -> [Duration]
 bestGuess = map value . (\x -> ok x ++ current x) . head . keep 1
 
 erro :: (Fractional a, Real a) => a -> a -> Rational
+erro _ 0 = 0
 erro a b = toRational $ abs $ 1 - (a / b)
 
 keep :: Int -> [PossibleDurations] -> [PossibleDurations]
@@ -180,11 +183,14 @@ keep n = (map snd) . (take n) . sort . (map compute) . (mapMaybe remove)
     compute xs     = (fold err xs * err' xs, xs)
     err'    xs     = erro (fold original xs) $ fold (duration . value) xs
     fold f  xs     = foldr ((+) . f) 0 $ current xs
-    remove  xs     = if begin 0 (current xs) then Just xs else Nothing
-    begin a []     = a <= (0.25 :: Rational)
-    begin a (x:xs)
-      | a == 0.25 = begin 0 (x:xs)
-      | otherwise = begin (a + (duration $ value $ x)) xs
+    remove  xs     = liftM (aux $ ok xs) $ split (0 :: Rational) [] (current xs)
+    aux xs (a, b)  = PossibleDurations (xs ++ a) b
+    split a acc xs
+      | a == 0.25 = Just (reverse acc, xs)
+      | a >  0.25 = Nothing
+      | otherwise = case xs of
+        []      -> Just ([], reverse acc)
+        (x:xs') -> split (a + (duration $ value $ x)) (x : acc) xs'
 
 
 
