@@ -1,6 +1,4 @@
-module Duration (Duration, fromFractional, guess, bestGuess, isNote, showNote,
-  empty)
-  where
+module Duration (Duration, fromFractional, guess, isNote, showNote) where
 
 import Data.List  (sort)
 import Data.Maybe (mapMaybe)
@@ -147,9 +145,6 @@ instance Ord PossibleDurations where
 -- Exported functions --
 ------------------------
 
-empty :: PossibleDurations
-empty = PossibleDurations [] 0 []
-
 -- | Tell if a duration is one of a regular note.
 isNote :: Duration -> Bool
 isNote (Other _) = False
@@ -176,15 +171,18 @@ fromFractional x
       | otherwise               = search next $ next i
     diff                        = abs . (subtract x) . duration
 
+guess :: (Fractional a, Ord a, Real a) => [a] -> [Duration]
+guess = bestGuess . foldl (flip guess'') [PossibleDurations [] 0 []]
+
 guess' :: (Fractional a, Ord a, Real a) => a -> [PossibleDuration]
 guess' time = [struct (pred closest), struct closest, struct (succ closest)]
   where
     closest  = fromFractional time
     struct d = PossibleDuration d (toRational time) $ erro time $ duration d
 
-guess :: (Fractional a, Ord a, Real a) =>
+guess'' :: (Fractional a, Ord a, Real a) =>
     a -> [PossibleDurations] -> [PossibleDurations]
-guess t = keep 3 . concatMap (flip add (guess' t))
+guess'' t = keep 3 . concatMap (flip add (guess' t))
 
 add :: PossibleDurations -> [PossibleDuration] -> [PossibleDurations]
 add x = map (PossibleDurations (ok x) 0 . (current x ++) . (: []))
