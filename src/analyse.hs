@@ -51,16 +51,16 @@ equalise durations = zip (aux durations) durations
 
 -- Join notes that are close into simultaneous notes.
 join :: (Fractional a, Ord a) => [(a, b)] -> [(a, [b])]
-join = initialRest . aux
+join = initialRest . join'
   where
-    initialRest xs
+    initialRest xs -- If the first note is a substantial rest, add it.
       | null (takeWhile ((> 0.5) . fst) xs) = xs
       | otherwise                           = (0, []) : xs
-    aux []            = []
-    aux (x : xs) = ((+ offset) *** (: map snd simult)) x : aux rest
+    join' []            = []
+    join' (x : xs)      = ((+ offset) *** (: map snd simult)) x : join' rest
       where
         (simult, after) = span ((< 0.075) . fst) xs
-        rest
-          | null after  = []
-          | otherwise   = first (+ offset) (head after) : tail after
+        rest = case after of
+          []       -> []
+          (y : ys) -> first (+ offset) y : ys
         offset          = (/ 2) $ sum $ map fst simult
