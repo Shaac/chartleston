@@ -42,12 +42,12 @@ normalise xs = map ((/ norm) *** (/ norm)) xs
 -- Equalise an integer list: close values next to each other are leveled.
 -- The original values are kept aside.
 equalise :: (Fractional a, Ord a) => [a] -> [(a, a)]
-equalise durations = zip (aux durations) durations
+equalise durations = zip (equalise' durations) durations
   where
-    aux []  = []
-    aux xs  = let (similar, rest) = cut xs in level similar ++ (aux rest)
-    cut l   = span ((< 0.2) . abs . (1 -) . (/ (head l))) l
-    level l = let s = length l in replicate s $ sum l / (fromIntegral s)
+    equalise' [] = []
+    equalise' xs = uncurry (($) . (++)) $ (level *** equalise') $ cut xs
+    cut       xs = span ((< 0.2) . abs . (1 -) . (/ (head xs))) xs
+    level     xs = let s = length xs in replicate s $ sum xs / (fromIntegral s)
 
 -- Join notes that are close into simultaneous notes.
 join :: (Fractional a, Ord a) => [(a, b)] -> [(a, [b])]
