@@ -45,7 +45,7 @@ equalise :: (Fractional a, Ord a) => [a] -> [(a, a)]
 equalise durations = zip (equalise' durations) durations
   where
     equalise' [] = []
-    equalise' xs = uncurry (($) . (++)) $ (level *** equalise') $ cut xs
+    equalise' xs = uncurry (($) . (++)) $ level *** equalise' $ cut xs
     cut       xs = span ((< 0.2) . abs . (1 -) . (/ (head xs))) xs
     level     xs = let s = length xs in replicate s $ sum xs / (fromIntegral s)
 
@@ -54,7 +54,7 @@ join :: (Fractional a, Ord a) => [(a, b)] -> [(a, [b])]
 join = initialRest . join'
   where
     initialRest xs -- If the first note is a substantial rest, add it.
-      | null (takeWhile ((> 0.5) . fst) xs) = xs
+      | null $ takeWhile ((> 0.5) . fst) xs = xs
       | otherwise                           = (0, []) : xs
     join' []            = []
     join' (x : xs)      = ((+ offset) *** (: map snd simult)) x : join' rest
