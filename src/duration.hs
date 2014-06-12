@@ -169,10 +169,10 @@ fromFractional x
     diff                        = abs . (subtract x) . duration
 
 guessOne :: (Fractional a, Ord a, Real a) => a -> [PossibleDuration]
-guessOne time = [struct (pred closest), struct closest, struct (succ closest)]
+guessOne time = [possible (pred c), possible c, possible (succ c)]
   where
-    closest  = fromFractional time
-    struct d = PossibleDuration d (toRational time) $ erro time $ duration d
+    c          = fromFractional time
+    possible d = PossibleDuration d (toRational time) $ erro time $ duration d
 
 guessNext :: (Fractional a, Ord a, Real a) =>
     a -> [PossibleDurations] -> [PossibleDurations]
