@@ -1,5 +1,6 @@
-module Duration (Duration, fromFractional, guess, isNote, showNote) where
+module Duration (Duration, guess, isNote, showNote) where
 
+import Control.Arrow (second)
 import Control.Monad (liftM)
 import Data.Maybe    (mapMaybe)
 import Data.Ratio    (numerator)
@@ -109,7 +110,7 @@ instance Real Duration where
   toRational = duration
 
 instance RealFrac Duration where
-  properFraction = properFraction . duration
+  properFraction = second fromFractional' . properFraction . toRational
 
 instance Show Duration where
   -- | Display the duration name in UK English.
@@ -147,6 +148,14 @@ showNote n@(Dotted x) | x >= 0 = flip ($) $ lilypond n
 showNote n = const $ "R1 * " ++ (show $ (numerator $ duration n :: Integer))
 -- TODO: long non-rest notes
 
+guess :: (Fractional a, Ord a, Real a) => [a] -> [Duration]
+guess = bestGuess . foldl (flip guessNext) [PossibleDurations [] 0 []]
+  where bestGuess = map value . (\x -> ok x ++ current x) . head . keep 1
+
+---------------------
+-- Local functions --
+---------------------
+
 -- | Get the closest Duration corresponding to a fraction of a measure.
 fromFractional :: (Fractional a, Ord a, Real a) => a -> Duration
 fromFractional x
@@ -158,15 +167,6 @@ fromFractional x
       | diff i <= diff (next i) = i
       | otherwise               = search next $ next i
     diff                        = abs . (subtract x) . duration
-
-guess :: (Fractional a, Ord a, Real a) => [a] -> [Duration]
-guess = bestGuess . foldl (flip guessNext) [PossibleDurations [] 0 []]
-  where bestGuess = map value . (\x -> ok x ++ current x) . head . keep 1
-
-
----------------------
--- Local functions --
----------------------
 
 guessOne :: (Fractional a, Ord a, Real a) => a -> [PossibleDuration]
 guessOne time = [struct (pred closest), struct closest, struct (succ closest)]

@@ -3,7 +3,7 @@ module Analyse (analyse) where
 import Data.List     (group, sort)
 import Control.Arrow (first, (***), (&&&))
 
-import Duration (Duration, fromFractional, guess)
+import Duration (Duration, guess)
 
 
 ------------------------
@@ -12,7 +12,7 @@ import Duration (Duration, fromFractional, guess)
 
 -- | Analyse a list of real notes and organise them with regular durations.
 analyse :: (RealFrac a, Ord a) => [(a, b)] -> [(Duration, [b])]
-analyse = uncurry zip . (first $ map fromFractional . treat) . unzip . join
+analyse = uncurry zip . first treat . unzip . join
   where
     treat = lastNote . detect . normalise . equalise . drop 1
 
@@ -26,8 +26,8 @@ lastNote :: RealFrac a => [a] -> [a]
 lastNote xs = xs ++ [1 - ((snd :: (Int, a) -> a) $ properFraction $ sum xs)]
 
 -- Detect the notes durations.
-detect :: RealFrac a => [(a, a)] -> [Rational]
-detect = map (toRational) . guess . map snd
+detect :: RealFrac a => [(a, a)] -> [Duration]
+detect =  guess . map snd
 
 -- Normalise the duration list so that it represents the fraction of a measure.
 normalise :: RealFrac a => [(a, a)] -> [(a, a)]
