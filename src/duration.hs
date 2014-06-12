@@ -8,6 +8,7 @@ import Data.Ratio (numerator)
 
 import Control.Monad (liftM)
 
+
 ---------------
 -- Structure --
 ---------------
@@ -16,21 +17,21 @@ import Control.Monad (liftM)
 -- Dotted: The note lengt is 1.5 times that of a basic note.
 data Duration = Basic Integer | Dotted Integer | Other Rational deriving Eq
 
+-- Represent a possible guess for a duration.
 data PossibleDuration = PossibleDuration {
-    value    :: Duration,
-    original :: Rational,
-    err      :: Rational
+    value    :: Duration, -- Guessed value.
+    original :: Rational, -- Original value.
+    err      :: Rational  -- Error between original and guessed values.
 } deriving Show
 
+-- Represent a possible guess for an entire score.
 data PossibleDurations = PossibleDurations {
-    ok      :: [PossibleDuration],
-    okErr   :: Rational,
-    current :: [PossibleDuration]
+    ok      :: [PossibleDuration], -- Already checked values.
+    okErr   :: Rational,           -- Error for the checked values.
+    current :: [PossibleDuration]  -- Values worked on.
 } deriving Show
 
-empty :: PossibleDurations
-empty = PossibleDurations [] 0 []
-
+-- A duration is a measure of time, so it can be added.
 instance Num Duration where
   -- | Two notes can be added if the sum is a regular note.
   a@(Basic x) + b@(Basic y)
@@ -80,6 +81,7 @@ instance Num Duration where
 
   fromInteger = fromFractional' . (fromInteger :: Integer -> Rational)
 
+-- A duration has a previous and a next value (eg. dotted notes).
 instance Enum Duration where
   toEnum i
     | i < 7 && i `mod` 2 == 0 = Basic  $  toInteger i      `div` 2
@@ -94,9 +96,11 @@ instance Enum Duration where
     | otherwise = error "Such small dotted can not be an Enum."
   fromEnum _          = error "Other can not be an Enum."
 
+-- A duration is longer or shorter than an other.
 instance Ord Duration where
   a <= b = (duration a :: Rational) <= (duration b :: Rational)
 
+-- A duration represents a fraction of a semibreve.
 instance Fractional Duration where
   recip   (Basic  x) = Basic $ - x
   recip n@(Dotted _) = Other $ recip $ duration n
@@ -127,10 +131,24 @@ instance Show Duration where
   show (Dotted x)   = "dotted " ++ (show (Basic x))
   show (Other x)    = "duration: " ++ (show x)
 
+-- This need to be declared because, but is not really useful.
+-- Pairs of (Rational, PossibleDurations) will be compared.
+instance Eq PossibleDuration where
+  a == b = original a == original b
+instance Ord PossibleDuration where
+  a <= b = original a <= original b
+instance Eq PossibleDurations where
+  a == b = ok a == ok b && current a == current b
+instance Ord PossibleDurations where
+  a <= b = ok a < ok b || ((ok a == ok b) && (current a <= current b))
+
 
 ------------------------
 -- Exported functions --
 ------------------------
+
+empty :: PossibleDurations
+empty = PossibleDurations [] 0 []
 
 -- | Tell if a duration is one of a regular note.
 isNote :: Duration -> Bool
@@ -195,18 +213,6 @@ keep n = (map snd) . (take n) . sort . (map compute) . (mapMaybe remove)
         (x:xs') -> split (a + (duration $ value $ x)) (x : acc) xs'
 
 
-
-instance Eq PossibleDuration where
-  a == b = original a == original b
-
-instance Ord PossibleDuration where
-  a <= b = original a <= original b
-
-instance Eq PossibleDurations where
-  a == b = ok a == ok b && current a == current b
-
-instance Ord PossibleDurations where
-  a <= b = ok a < ok b || ((ok a == ok b) && (current a <= current b))
 
 ---------------------
 -- Local functions --
