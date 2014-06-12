@@ -169,9 +169,8 @@ closest x
     diff                        = abs . (subtract x) . duration
 
 guessOne :: (Fractional a, Ord a, Real a) => a -> [PossibleDuration]
-guessOne time = [possible (pred c), possible c, possible (succ c)]
+guessOne time = map possible $ take 3 [pred (closest time)..]
   where
-    c          = closest time
     possible d = PossibleDuration d (toRational time) $ erro time $ duration d
 
 guessNext :: (Fractional a, Ord a, Real a) =>
