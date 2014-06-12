@@ -1,7 +1,7 @@
 module Analyse (analyse) where
 
 import Data.List     (group, sort)
-import Control.Arrow (first)
+import Control.Arrow (first, (***))
 
 import Duration (Duration, fromFractional, guess)
 
@@ -31,7 +31,7 @@ detect = map (toRational) . guess . map snd
 
 -- Normalise the duration list so that it represents the fraction of a measure.
 normalise :: RealFrac a => [(a, a)] -> [(a, a)]
-normalise xs = map (\(a, b) -> (a / norm, b / norm)) xs
+normalise xs = map ((/ norm) *** (/ norm)) xs
   where
     norm     = let x = majority (map fst xs) in x * (closest $ 3 / x)
     majority = snd . maximum . (map (\x -> (length x, head x))) . group . sort
