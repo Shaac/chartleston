@@ -148,7 +148,7 @@ showNote n@(Dotted x) | x >= 0 = flip ($) $ lilypond n
 showNote n = const $ "R1 * " ++ (show $ (numerator $ duration n :: Integer))
 -- TODO: long non-rest notes
 
-guess :: (Fractional a, Ord a, Real a) => [a] -> [Duration]
+guess :: (Fractional a, Real a) => [a] -> [Duration]
 guess = bestGuess . foldl (flip guessNext) [PossibleDurations [] 0 []]
   where bestGuess = map value . (\x -> ok x ++ current x) . head . keep 1
 
@@ -157,7 +157,7 @@ guess = bestGuess . foldl (flip guessNext) [PossibleDurations [] 0 []]
 ---------------------
 
 -- | Get the closest Duration corresponding to a fraction of a measure.
-closest :: (Fractional a, Ord a, Real a) => a -> Duration
+closest :: (Fractional a, Real a) => a -> Duration
 closest x
   | x <= 0    = Other (toRational x)
   | x <= 1    = search succ $ Basic 0
@@ -168,7 +168,7 @@ closest x
       | otherwise               = search next $ next i
     diff                        = abs . (subtract x) . duration
 
-guessNext :: (Fractional a, Ord a, Real a) =>
+guessNext :: (Fractional a, Real a) =>
   a -> [PossibleDurations] -> [PossibleDurations]
 guessNext = (keep 3 .) . concatMap . flip add . guessOne
   where
