@@ -173,12 +173,12 @@ fromFractional x
 
 guess :: (Fractional a, Ord a, Real a) => [a] -> [Duration]
 guess = bestGuess . foldl (flip guessNext) [PossibleDurations [] 0 []]
+  where bestGuess = map value . (\x -> ok x ++ current x) . head . keep 1
 
 
 ---------------------
 -- Local functions --
 ---------------------
-
 
 guessOne :: (Fractional a, Ord a, Real a) => a -> [PossibleDuration]
 guessOne time = [struct (pred closest), struct closest, struct (succ closest)]
@@ -189,12 +189,7 @@ guessOne time = [struct (pred closest), struct closest, struct (succ closest)]
 guessNext :: (Fractional a, Ord a, Real a) =>
     a -> [PossibleDurations] -> [PossibleDurations]
 guessNext t = keep 3 . concatMap (flip add (guessOne t))
-
-add :: PossibleDurations -> [PossibleDuration] -> [PossibleDurations]
-add x = map (PossibleDurations (ok x) 0 . (current x ++) . (: []))
-
-bestGuess :: [PossibleDurations] -> [Duration]
-bestGuess = map value . (\x -> ok x ++ current x) . head . keep 1
+  where add x = map (PossibleDurations (ok x) 0 . (current x ++) . (: []))
 
 erro :: (Fractional a, Real a) => a -> a -> Rational
 erro _ 0 = 0
