@@ -1,10 +1,9 @@
 module Duration (Duration, fromFractional, guess, isNote, showNote) where
 
-import Data.List  (sort)
-import Data.Maybe (mapMaybe)
-import Data.Ratio (numerator)
-
 import Control.Monad (liftM)
+import Data.Maybe    (mapMaybe)
+import Data.Ratio    (numerator)
+import GHC.Exts      (sortWith)
 
 
 ---------------
@@ -129,17 +128,6 @@ instance Show Duration where
   show (Dotted x)   = "dotted " ++ (show (Basic x))
   show (Other x)    = "duration: " ++ (show x)
 
--- This need to be declared because, but is not really useful.
--- Pairs of (Rational, PossibleDurations) will be compared.
-instance Eq PossibleDuration where
-  a == b = original a == original b
-instance Ord PossibleDuration where
-  a <= b = original a <= original b
-instance Eq PossibleDurations where
-  a == b = ok a == ok b && current a == current b
-instance Ord PossibleDurations where
-  a <= b = ok a < ok b || ((ok a == ok b) && (current a <= current b))
-
 
 ------------------------
 -- Exported functions --
@@ -200,7 +188,7 @@ err' xs = fold err xs * (erro (fold original xs) $ fold (duration . value) xs)
   where fold f = foldr ((+) . f) 0
 
 keep :: Int -> [PossibleDurations] -> [PossibleDurations]
-keep n = (map snd) . (take n) . sort . (map compute) . matchTempo
+keep n = (map snd) . (take n) . sortWith fst . (map compute) . matchTempo
   where compute xs = (okErr xs + err' (current xs), xs)
 
 matchTempo :: [PossibleDurations] -> [PossibleDurations]
