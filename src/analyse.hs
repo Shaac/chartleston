@@ -57,7 +57,7 @@ join = first' . aux
       | null (takeWhile ((> 0.5) . fst) xs) = xs
       | otherwise                            = (0, []) : xs
     aux []            = []
-    aux ((d, n) : xs) = (d + s, n : map snd simult) : aux rest
+    aux (x : xs) = ((+ s) *** (: map snd simult)) x : aux rest
       where
         (simult, after) = span ((< 0.075) . fst) xs
         rest
