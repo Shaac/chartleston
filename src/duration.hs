@@ -204,8 +204,10 @@ keep n = (map snd) . (take n) . sort . (map compute) . matchTempo
   where compute xs = (okErr xs + err' (current xs), xs)
 
 matchTempo :: [PossibleDurations] -> [PossibleDurations]
-matchTempo = mapMaybe remove
+matchTempo l = if null result then finish l else result
   where
+    finish         = id
+    result         = mapMaybe remove l
     remove  xs     = liftM (aux xs) $ split (0 :: Rational) [] (current xs)
     aux xs (a, b)  = PossibleDurations x (err' x) b
       where x = (ok xs) ++ a
