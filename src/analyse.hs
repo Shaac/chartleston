@@ -1,7 +1,7 @@
 module Analyse (analyse) where
 
 import Data.List     (group, sort)
-import Control.Arrow (first, (***))
+import Control.Arrow (first, (***), (&&&))
 
 import Duration (Duration, fromFractional, guess)
 
@@ -34,7 +34,7 @@ normalise :: RealFrac a => [(a, a)] -> [(a, a)]
 normalise xs = map ((/ norm) *** (/ norm)) xs
   where
     norm     = let x = majority (map fst xs) in x * (closest $ 3 / x)
-    majority = snd . maximum . (map (\x -> (length x, head x))) . group . sort
+    majority = snd . maximum . map (length &&& head) . group . sort
     closest x
       | x <= 2    = max 1 $ fromInteger $ round x
       | otherwise = 2 * (closest (x / 2))
