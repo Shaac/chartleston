@@ -1,4 +1,5 @@
-module Duration (Duration, fromFractional, guess, bestGuess, isNote, showNote)
+module Duration (Duration, fromFractional, guess, bestGuess, isNote, showNote,
+  empty)
   where
 
 import Data.List  (sort)
@@ -18,6 +19,14 @@ data PossibleDuration = PossibleDuration {
     original :: Rational,
     err      :: Rational
 }
+
+data PossibleDurations = PossibleDurations {
+    ok      :: [PossibleDuration],
+    current :: [PossibleDuration]
+}
+
+empty :: PossibleDurations
+empty = PossibleDurations [] []
 
 instance Num Duration where
   -- | Two notes can be added if the sum is a regular note.
@@ -153,23 +162,25 @@ guess' time = [struct (pred closest), struct closest, struct (succ closest)]
     struct d = PossibleDuration d (toRational time) $ erro time $ duration d
 
 guess :: (Fractional a, Ord a, Real a) =>
-    a -> [[PossibleDuration]] -> [[PossibleDuration]]
-guess t = keep 3 . concatMap (flip map g . (++))
-  where g = map (: []) (guess' t)
+    a -> [PossibleDurations] -> [PossibleDurations]
+guess t = keep 3 . concatMap (flip add (guess' t))
 
-bestGuess :: [[PossibleDuration]] -> [Duration]
-bestGuess = map value . head . keep 1
+add :: PossibleDurations -> [PossibleDuration] -> [PossibleDurations]
+add x = map (PossibleDurations (ok x) . (current x ++) . (: []))
+
+bestGuess :: [PossibleDurations] -> [Duration]
+bestGuess = map value . (\x -> ok x ++ current x) . head . keep 1
 
 erro :: (Fractional a, Real a) => a -> a -> Rational
 erro a b = toRational $ abs $ 1 - (a / b)
 
-keep :: Int -> [[PossibleDuration]] -> [[PossibleDuration]]
+keep :: Int -> [PossibleDurations] -> [PossibleDurations]
 keep n = (map snd) . (take n) . sort . (map compute) . (mapMaybe remove)
   where
     compute xs     = (fold err xs * err' xs, xs)
     err'    xs     = erro (fold original xs) $ fold (duration . value) xs
-    fold f  xs     = foldr ((+) . f) 0 xs
-    remove  xs     = if begin 0 xs then Just xs else Nothing
+    fold f  xs     = foldr ((+) . f) 0 $ current xs
+    remove  xs     = if begin 0 (current xs) then Just xs else Nothing
     begin a []     = a <= (0.25 :: Rational)
     begin a (x:xs)
       | a == 0.25 = begin 0 (x:xs)
@@ -182,6 +193,12 @@ instance Eq PossibleDuration where
 
 instance Ord PossibleDuration where
   a <= b = original a <= original b
+
+instance Eq PossibleDurations where
+  a == b = ok a == ok b && current a == current b
+
+instance Ord PossibleDurations where
+  a <= b = ok a < ok b || ((ok a == ok b) && (current a <= current b))
 
 ---------------------
 -- Local functions --
