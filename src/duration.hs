@@ -172,17 +172,23 @@ fromFractional x
     diff                        = abs . (subtract x) . duration
 
 guess :: (Fractional a, Ord a, Real a) => [a] -> [Duration]
-guess = bestGuess . foldl (flip guess'') [PossibleDurations [] 0 []]
+guess = bestGuess . foldl (flip guessNext) [PossibleDurations [] 0 []]
 
-guess' :: (Fractional a, Ord a, Real a) => a -> [PossibleDuration]
-guess' time = [struct (pred closest), struct closest, struct (succ closest)]
+
+---------------------
+-- Local functions --
+---------------------
+
+
+guessOne :: (Fractional a, Ord a, Real a) => a -> [PossibleDuration]
+guessOne time = [struct (pred closest), struct closest, struct (succ closest)]
   where
     closest  = fromFractional time
     struct d = PossibleDuration d (toRational time) $ erro time $ duration d
 
-guess'' :: (Fractional a, Ord a, Real a) =>
+guessNext :: (Fractional a, Ord a, Real a) =>
     a -> [PossibleDurations] -> [PossibleDurations]
-guess'' t = keep 3 . concatMap (flip add (guess' t))
+guessNext t = keep 3 . concatMap (flip add (guessOne t))
 
 add :: PossibleDurations -> [PossibleDuration] -> [PossibleDurations]
 add x = map (PossibleDurations (ok x) 0 . (current x ++) . (: []))
@@ -210,11 +216,6 @@ keep n = (map snd) . (take n) . sort . (map compute) . (mapMaybe remove)
         []      -> Just ([], reverse acc)
         (x:xs') -> split (a + (duration $ value $ x)) (x : acc) xs'
 
-
-
----------------------
--- Local functions --
----------------------
 
 -- Give the fraction of a measure corresponding to a Duration.
 duration :: Fractional a => Duration -> a
