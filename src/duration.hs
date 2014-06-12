@@ -195,14 +195,19 @@ erro :: (Fractional a, Real a) => a -> a -> Rational
 erro _ 0 = 0
 erro a b = toRational $ abs $ 1 - (a / b)
 
+err' :: [PossibleDuration] -> Rational
+err' xs = fold err xs * (erro (fold original xs) $ fold (duration . value) xs)
+  where fold f = foldr ((+) . f) 0
+
 keep :: Int -> [PossibleDurations] -> [PossibleDurations]
-keep n = (map snd) . (take n) . sort . (map compute) . (mapMaybe remove)
+keep n = (map snd) . (take n) . sort . (map compute) . matchTempo
+  where compute xs = (okErr xs + err' (current xs), xs)
+
+matchTempo :: [PossibleDurations] -> [PossibleDurations]
+matchTempo = mapMaybe remove
   where
-    compute xs     = (okErr xs + fold err xs * err' xs, xs)
-    err'    xs     = erro (fold original xs) $ fold (duration . value) xs
-    fold f  xs     = foldr ((+) . f) 0 $ current xs
     remove  xs     = liftM (aux xs) $ split (0 :: Rational) [] (current xs)
-    aux xs (a, b)  = PossibleDurations x (fst $ compute $ PossibleDurations [] 0 x) b
+    aux xs (a, b)  = PossibleDurations x (err' x) b
       where x = (ok xs) ++ a
     split a acc xs
       | a == 0.25 = Just (reverse acc, xs)
