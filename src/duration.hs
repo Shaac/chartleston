@@ -43,7 +43,7 @@ instance Num Duration where
   a@(Dotted x) + b@(Dotted y)
     | x == y = Dotted (x - 1)
     | otherwise = Other (duration a + duration b)
-  (Other r) + x = fromFractional' (r + duration x :: Rational)
+  (Other r) + x = closest' (r + duration x :: Rational)
   a + b = b + a
 
   -- | Soustraction of two notes will probably never be used but still.
@@ -60,12 +60,12 @@ instance Num Duration where
   a@(Dotted x) - b@(Dotted y)
     | x + 1 == y = Dotted y
     | otherwise  = Other (duration a - duration b)
-  a - b          = fromFractional' (duration a - duration b :: Rational)
+  a - b          = closest' (duration a - duration b :: Rational)
 
   (Basic  x) * (Basic  y) = Basic  $ x + y
   (Basic  x) * (Dotted y) = Dotted $ x + y
   (Dotted x) * (Dotted y) = Dotted $ x + y - 1
-  (Other  x) * d          = fromFractional' $ x + duration d
+  (Other  x) * d          = closest' $ x + duration d
   a          * b          = b * a
 
   signum (Other x)
@@ -77,7 +77,7 @@ instance Num Duration where
   abs (Other x) = Other $ abs x
   abs d         = d
 
-  fromInteger = fromFractional' . (fromInteger :: Integer -> Rational)
+  fromInteger = closest' . (fromInteger :: Integer -> Rational)
 
 -- A duration has a previous and a next value (eg. dotted notes).
 instance Enum Duration where
@@ -102,15 +102,15 @@ instance Ord Duration where
 instance Fractional Duration where
   recip   (Basic  x) = Basic $ - x
   recip n@(Dotted _) = Other $ recip $ duration n
-  recip   (Other  x) = fromFractional' $ recip x
+  recip   (Other  x) = closest' $ recip x
 
-  fromRational = fromFractional'
+  fromRational = closest'
 
 instance Real Duration where
   toRational = duration
 
 instance RealFrac Duration where
-  properFraction = second fromFractional' . properFraction . toRational
+  properFraction = second closest' . properFraction . toRational
 
 instance Show Duration where
   -- | Display the duration name in UK English.
@@ -157,8 +157,8 @@ guess = bestGuess . foldl (flip guessNext) [PossibleDurations [] 0 []]
 ---------------------
 
 -- | Get the closest Duration corresponding to a fraction of a measure.
-fromFractional :: (Fractional a, Ord a, Real a) => a -> Duration
-fromFractional x
+closest :: (Fractional a, Ord a, Real a) => a -> Duration
+closest x
   | x <= 0    = Other (toRational x)
   | x <= 1    = search succ $ Basic 0
   | otherwise = search pred $ Basic 0
@@ -171,7 +171,7 @@ fromFractional x
 guessOne :: (Fractional a, Ord a, Real a) => a -> [PossibleDuration]
 guessOne time = [possible (pred c), possible c, possible (succ c)]
   where
-    c          = fromFractional time
+    c          = closest time
     possible d = PossibleDuration d (toRational time) $ erro time $ duration d
 
 guessNext :: (Fractional a, Ord a, Real a) =>
@@ -213,9 +213,9 @@ duration (Basic  x) = 1 / 2 ^^ x
 duration (Dotted x) = 3 / 2 ^^ (x + 1)
 duration (Other  x) = fromRational x
 
-fromFractional' :: (Fractional a, Ord a, Real a) => a -> Duration
-fromFractional' x = if (x == duration try) then try else Other $ toRational x
-  where try = fromFractional x
+closest' :: (Fractional a, Ord a, Real a) => a -> Duration
+closest' x = if (x == duration try) then try else Other $ toRational x
+  where try = closest x
 
 -- Return the Lilypond suffix corresponding to the duration.
 lilypond :: Duration -> String
