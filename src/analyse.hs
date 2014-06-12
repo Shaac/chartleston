@@ -1,6 +1,7 @@
 module Analyse (analyse) where
 
-import Data.List  (group, sort)
+import Data.List     (group, sort)
+import Control.Arrow (first)
 
 import Duration (Duration, fromFractional, guess)
 
@@ -11,7 +12,7 @@ import Duration (Duration, fromFractional, guess)
 
 -- | Analyse a list of real notes and organise them with regular durations.
 analyse :: (RealFrac a, Ord a) => [(a, b)] -> [(Duration, [b])]
-analyse = uncurry zip . (mapFst $ map fromFractional . treat) . unzip . join
+analyse = uncurry zip . (first $ map fromFractional . treat) . unzip . join
   where
     treat = lastNote . detect . normalise . equalise . drop 1
 
@@ -50,9 +51,9 @@ equalise durations = zip (aux durations) durations
 
 -- Join notes that are close into simultaneous notes.
 join :: (Fractional a, Ord a) => [(a, b)] -> [(a, [b])]
-join = first . aux
+join = first' . aux
   where
-    first xs
+    first' xs
       | null (takeWhile ((> 0.5) . fst) xs) = xs
       | otherwise                            = (0, []) : xs
     aux []            = []
@@ -61,9 +62,5 @@ join = first . aux
         (simult, after) = span ((< 0.075) . fst) xs
         rest
           | null after  = []
-          | otherwise   = mapFst (+ s) (head after) : tail after
+          | otherwise   = first (+ s) (head after) : tail after
         s               = (/ 2) $ sum $ map fst simult
-
--- Apply a function to the first item of a tuple.
-mapFst :: (a -> b) -> (a, c) -> (b, c)
-mapFst f (x, y) = (f x, y)
