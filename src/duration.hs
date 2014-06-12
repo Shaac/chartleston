@@ -189,7 +189,7 @@ keep n = (map snd) . (take n) . sort . (map compute) . (mapMaybe remove)
       where x = (ok xs) ++ a
     split a acc xs
       | a == 0.25 = Just (reverse acc, xs)
-      | a >  0.25 = Nothing
+      | a >  0.25 = if length acc == 1 then Just (acc, xs) else Nothing
       | otherwise = case xs of
         []      -> Just ([], reverse acc)
         (x:xs') -> split (a + (duration $ value $ x)) (x : acc) xs'
