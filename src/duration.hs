@@ -24,11 +24,12 @@ data PossibleDuration = PossibleDuration {
 
 data PossibleDurations = PossibleDurations {
     ok      :: [PossibleDuration],
+    okErr   :: Rational,
     current :: [PossibleDuration]
 } deriving Show
 
 empty :: PossibleDurations
-empty = PossibleDurations [] []
+empty = PossibleDurations [] 0 []
 
 instance Num Duration where
   -- | Two notes can be added if the sum is a regular note.
@@ -168,7 +169,7 @@ guess :: (Fractional a, Ord a, Real a) =>
 guess t = keep 3 . concatMap (flip add (guess' t))
 
 add :: PossibleDurations -> [PossibleDuration] -> [PossibleDurations]
-add x = map (PossibleDurations (ok x) . (current x ++) . (: []))
+add x = map (PossibleDurations (ok x) 0 . (current x ++) . (: []))
 
 bestGuess :: [PossibleDurations] -> [Duration]
 bestGuess = map value . (\x -> ok x ++ current x) . head . keep 1
@@ -180,11 +181,12 @@ erro a b = toRational $ abs $ 1 - (a / b)
 keep :: Int -> [PossibleDurations] -> [PossibleDurations]
 keep n = (map snd) . (take n) . sort . (map compute) . (mapMaybe remove)
   where
-    compute xs     = (fold err xs * err' xs, xs)
+    compute xs     = (okErr xs + fold err xs * err' xs, xs)
     err'    xs     = erro (fold original xs) $ fold (duration . value) xs
     fold f  xs     = foldr ((+) . f) 0 $ current xs
-    remove  xs     = liftM (aux $ ok xs) $ split (0 :: Rational) [] (current xs)
-    aux xs (a, b)  = PossibleDurations (xs ++ a) b
+    remove  xs     = liftM (aux xs) $ split (0 :: Rational) [] (current xs)
+    aux xs (a, b)  = PossibleDurations x (fst $ compute $ PossibleDurations [] 0 x) b
+      where x = (ok xs) ++ a
     split a acc xs
       | a == 0.25 = Just (reverse acc, xs)
       | a >  0.25 = Nothing
