@@ -5,15 +5,15 @@ import Data.Ratio (denominator)
 
 import Duration (Duration, isNote)
 import Note     (Note, isCymbal, isTom, flams)
+import Score    (Measure(Measure))
 
 ------------------------
 -- Exported functions --
 ------------------------
 
 -- | Get the structure of a notes list.
-structure :: [(Duration, [Note])] ->
-  [([(Duration, [Note])], [(Duration, [Note])])]
-structure = map voices . measures . getFlams
+structure :: [(Duration, [Note])] -> [Measure]
+structure = map (flip Measure 1) . map voices . measures . getFlams
 
 
 ---------------------

@@ -2,7 +2,7 @@ module Write (write) where
 
 import Duration (Duration, showNote)
 import Note     (Note, show')
-import Score    (Score, title, score)
+import Score    (Measure(measure), Score, title, score)
 
 
 ------------------------
@@ -10,8 +10,8 @@ import Score    (Score, title, score)
 ------------------------
 
 -- | Write the music in Lilypond format.
-write :: Score [([(Duration, [Note])], [(Duration, [Note])])] -> String
-write s = text $ score s
+write :: Score [Measure] -> String
+write s = text $ map measure $ score s
   where
     text = (prefix (title s) ++) . (++ suffix) . (concatMap $ uncurry voices)
 
