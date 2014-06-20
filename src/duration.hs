@@ -113,7 +113,7 @@ instance RealFrac Duration where
   properFraction = second closest' . properFraction . toRational
 
 instance Show Duration where
-  -- | Display the duration name in UK English.
+  -- Display the duration name in UK English.
   show (Basic (-3)) = "maxima"
   show (Basic (-2)) = "longa"
   show (Basic (-1)) = "breve"
@@ -152,11 +152,12 @@ guess :: (Fractional a, Real a) => [a] -> [Duration]
 guess = bestGuess . foldl (flip guessNext) [PossibleDurations [] 0 []]
   where bestGuess = map value . (\x -> ok x ++ current x) . head . keep 1
 
+
 ---------------------
 -- Local functions --
 ---------------------
 
--- | Get the closest Duration corresponding to a fraction of a measure.
+-- Get the closest Duration corresponding to a fraction of a measure.
 closest :: (Fractional a, Real a) => a -> Duration
 closest x
   | x <= 0    = Other $ toRational x
@@ -168,6 +169,12 @@ closest x
       | otherwise               = search next $ next i
     diff                        = abs . subtract x . duration
 
+-- See if the duration in fraction is an exact Duration.
+closest' :: (Fractional a, Ord a, Real a) => a -> Duration
+closest' x = if x == duration try then try else Other $ toRational x
+  where try = closest x
+
+-- Guess a new note, and add it to the already guessed.
 guessNext :: (Fractional a, Real a) =>
   a -> [PossibleDurations] -> [PossibleDurations]
 guessNext = (keep 3 .) . concatMap . flip add . guessOne
@@ -176,18 +183,22 @@ guessNext = (keep 3 .) . concatMap . flip add . guessOne
     guessOne time = map (possible time) $ take 3 [pred (closest time)..]
     possible t d  = PossibleDuration d (toRational t) $ erro t $ duration d
 
+-- Compute the error between a guessed note and its actual value.
 erro :: (Fractional a, Real a) => a -> a -> Rational
 erro _ 0 = 0
 erro a b = toRational $ abs $ 1 - (a / b)
 
+-- Compute the error of a group of guessed notes.
 err' :: [PossibleDuration] -> Rational
 err' xs = fold err xs * (erro (fold original xs) $ fold (duration . value) xs)
   where fold f = foldr ((+) . f) 0
 
+-- Keep only the best guesses.
 keep :: Int -> [PossibleDurations] -> [PossibleDurations]
 keep n = map snd . take n . sortWith fst . map compute . matchTempo
   where compute = (uncurry (+) . (okErr &&& err' . current)) &&& id
 
+-- Verify that a sequence of notes has no length longer than a quaver.
 matchTempo :: [PossibleDurations] -> [PossibleDurations]
 matchTempo l = if null result then finish l else result
   where
@@ -203,16 +214,11 @@ matchTempo l = if null result then finish l else result
         []        -> Just ([], reverse acc)
         (x : xs') -> split (a + (duration $ value $ x)) (x : acc) xs'
 
-
 -- Give the fraction of a measure corresponding to a Duration.
 duration :: Fractional a => Duration -> a
 duration (Basic  x) = 1 / 2 ^^ x
 duration (Dotted x) = 3 / 2 ^^ (x + 1)
 duration (Other  x) = fromRational x
-
-closest' :: (Fractional a, Ord a, Real a) => a -> Duration
-closest' x = if x == duration try then try else Other $ toRational x
-  where try = closest x
 
 -- Return the Lilypond suffix corresponding to the duration.
 lilypond :: Duration -> String
