@@ -8,6 +8,14 @@ import GHC.Exts      (sortWith)
 
 
 ---------------
+-- Constants --
+---------------
+
+-- Number of simultaneous guesses for the detection.
+guesses :: Int
+guesses = 3
+
+---------------
 -- Structure --
 ---------------
 
@@ -177,7 +185,7 @@ closest' x = if x == duration try then try else Other $ toRational x
 -- Guess a new note, and add it to the already guessed.
 guessNext :: (Fractional a, Real a) =>
   a -> [PossibleDurations] -> [PossibleDurations]
-guessNext = (keep 3 .) . concatMap . flip add . guessOne
+guessNext = (keep guesses .) . concatMap . flip add . guessOne
   where
     add x = map $ PossibleDurations (ok x) (okErr x) . (current x ++) . (: [])
     guessOne time = map (possible time) $ take 3 [pred (closest time)..]
