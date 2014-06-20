@@ -30,7 +30,7 @@ main = do
 arg :: [String] -> String -> String
 arg []       _   = ""
 arg [_]      _   = ""
-arg (x:xs)   s
+arg (x : xs) s
   | x == '-' : s = head xs
   | otherwise    = arg xs s
 
@@ -38,10 +38,10 @@ arg (x:xs)   s
 name :: [String] -> String
 name args = if null outputname then inputname "" (args !! 0) else outputname
   where
-    outputname             = arg args "o"
-    inputname acc []       = acc
-    inputname _   ('/':xs) = inputname "" xs
-    inputname acc (x:xs)
+    outputname                               = arg args "o"
+    inputname acc []                         = acc
+    inputname _   ('/' : xs)                 = inputname "" xs
+    inputname acc (x : xs)
       | x == '.' && map toUpper xs == "MID"  = acc
       | x == '.' && map toUpper xs == "MIDI" = acc
       | otherwise                            = inputname (acc ++ [x]) xs
