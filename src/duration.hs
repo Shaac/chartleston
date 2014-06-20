@@ -1,6 +1,6 @@
 module Duration (Duration, guess, isNote, showNote) where
 
-import Control.Arrow (second)
+import Control.Arrow (second, (&&&))
 import Control.Monad (liftM)
 import Data.Maybe    (mapMaybe)
 import Data.Ratio    (numerator)
@@ -186,7 +186,7 @@ err' xs = fold err xs * (erro (fold original xs) $ fold (duration . value) xs)
 
 keep :: Int -> [PossibleDurations] -> [PossibleDurations]
 keep n = (map snd) . (take n) . sortWith fst . (map compute) . matchTempo
-  where compute xs = (okErr xs + err' (current xs), xs)
+  where compute = (uncurry (+) . (okErr &&& err' . current)) &&& id
 
 matchTempo :: [PossibleDurations] -> [PossibleDurations]
 matchTempo l = if null result then finish l else result
