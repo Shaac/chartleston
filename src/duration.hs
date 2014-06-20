@@ -172,7 +172,7 @@ guessNext :: (Fractional a, Real a) =>
   a -> [PossibleDurations] -> [PossibleDurations]
 guessNext = (keep 3 .) . concatMap . flip add . guessOne
   where
-    add x         = map (PossibleDurations (ok x) (okErr x) . (current x ++) . (: []))
+    add x = map $ PossibleDurations (ok x) (okErr x) . (current x ++) . (: [])
     guessOne time = map (possible time) $ take 3 [pred (closest time)..]
     possible t d  = PossibleDuration d (toRational t) $ erro t $ duration d
 
