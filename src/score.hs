@@ -13,5 +13,5 @@ instance Functor Score where
 
 data Measure = Measure {
     measure :: ([(Duration, [Note])], [(Duration, [Note])]),
-    repeat  :: Int
+    nRepeat :: Int
 } deriving Show

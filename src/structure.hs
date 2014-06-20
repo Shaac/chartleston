@@ -13,7 +13,7 @@ import Score    (Measure(Measure))
 
 -- | Get the structure of a notes list.
 structure :: [(Duration, [Note])] -> [Measure]
-structure = map (flip Measure 1) . map voices . measures . getFlams
+structure = repeats . map voices . measures . getFlams
 
 
 ---------------------
@@ -59,3 +59,12 @@ removeRests = converge . (iterate $ aux (0 :: Rational))
     add e x           = toRational x + e
     ok t e = if t' > denominator e then True else t' <= denominator (add e t)
       where t' = denominator $ toRational t
+
+-- Regroup equal measures that are next to each other.
+repeats :: [([(Duration, [Note])], [(Duration, [Note])])] -> [Measure]
+repeats l = repeats' (head l) 1 (tail l)
+  where
+    repeats' prev n [] = [Measure prev n]
+    repeats' prev n (x:xs)
+      | x == prev     = repeats' prev (n + 1) xs
+      | otherwise     = Measure prev n : repeats' x 1 xs
