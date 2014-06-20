@@ -17,14 +17,9 @@ main :: IO ()
 main = do
   args <- getArgs
   midi <- open $ args !! 0
-  if map toUpper (arg args "debug") == "TRUE" then do
-    putStrLn $ show $ midi
-    putStrLn $ show $ analyse $ midi
-    putStrLn $ show $ structure $ analyse $ midi
-  else do
-    let title' = name args
-    writeFile (title' ++ ".ly") $
-      write $ fmap structure $ fmap analyse $ Score title' midi
+  let title' = name args
+  writeFile (title' ++ ".ly") $
+    write $ fmap structure $ fmap analyse $ Score title' midi
 
 
 ---------------------
