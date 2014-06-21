@@ -1,16 +1,38 @@
 module Note (Note, show', fromPair, isCymbal, isTom, flams) where
 
+
+---------------
+-- Constants --
+---------------
+
+-- Threshold value for a note to be considered as ghost.
+threshold :: Int
+threshold = 50
+
+
+----------------
+-- Structures --
+----------------
+
 data Note = Note (Int, Int) | Flam (Int)
+
 data Velocity = Ghost | Regular | Accent deriving (Eq, Ord, Show)
 
 instance Eq Note where
   x@(Note (p, _)) == x'@(Note (p', _)) = p == p' && velocity x == velocity x'
-  Flam (p) == Flam (p')                = p == p'
-  _ == _                               = False
+  Flam (p)        == Flam (p')         = p == p'
+  _               == _                 = False
 
-threshold :: Int
-threshold = 50
+instance Show Note where
+  show = flip show' ""
 
+
+------------------------
+-- Exported functions --
+------------------------
+
+-- | Take a note and the lilypond representation of the duration.
+-- Return the lilypond representation of the note.
 show' :: Note -> String -> String
 show' x@(Note (p, _)) = let instr = instrument p in case velocity x of
   Ghost   -> (("\\parenthesize " ++ instr) ++)
@@ -19,18 +41,19 @@ show' x@(Note (p, _)) = let instr = instrument p in case velocity x of
 show' (Flam p) = (("\\acciaccatura{\\once\\stemUp " ++ i ++ "8}" ++ i) ++)
   where i = instrument p
 
-instance Show Note where
-  show = flip show' ""
-
+-- | Create a note from a pair (pitch, duration).
 fromPair :: (Int, Int) -> Note
 fromPair = Note
 
+-- | Determine if a note is a cymbal.
 isCymbal :: Note -> Bool
 isCymbal = flip elem [26, 42, 46, 49, 51, 52, 53, 55, 57, 59] . pitch
 
+-- | Determine if a note is a tom.
 isTom :: Note -> Bool
 isTom = flip elem [37, 38, 40, 41, 43, 45, 47, 48, 50] . pitch
 
+-- | Detect the flams in a list of simultaneous notes.
 flams :: [Note] -> [Note]
 flams (x@(Note (p, _)) : xs)
   | p `elem` (map pitch xs) = Flam p : flams (filter ((/= p) . pitch) xs)
@@ -38,10 +61,17 @@ flams (x@(Note (p, _)) : xs)
 flams (x : xs)              = x : flams xs
 flams x                     = x
 
+
+---------------------
+-- Local functions --
+---------------------
+
+-- Get the pitch (i.e. the instrument) of a note.
 pitch :: Note -> Int
 pitch (Note (p, _)) = p
 pitch (Flam (p))    = p
 
+-- Get the velocity (i.e. the strength) of a note.
 velocity :: Note -> Velocity
 velocity (Note (_, v)) | v == 127      = Accent
 velocity (Note (_, v)) | v > threshold = Regular

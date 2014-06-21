@@ -5,12 +5,12 @@ import Control.Monad                    (liftM, mfilter)
 import Numeric.NonNegative.Wrapper      (toNumber)
 
 import Sound.MIDI.File                  (explicitNoteOff, mergeTracks,
-                                         secondsFromTicks, T(Cons))
+                                         secondsFromTicks, T (Cons))
 import Sound.MIDI.File.Load             (fromFile)
 import Sound.MIDI.File.Event            (maybeMIDIEvent)
-import Sound.MIDI.Message.Channel       (Body(Voice), fromChannel,
+import Sound.MIDI.Message.Channel       (Body (Voice), fromChannel,
                                          messageBody, messageChannel)
-import Sound.MIDI.Message.Channel.Voice (fromPitch, fromVelocity, T(NoteOn))
+import Sound.MIDI.Message.Channel.Voice (fromPitch, fromVelocity, T (NoteOn))
 
 import Note (Note, fromPair)
 
