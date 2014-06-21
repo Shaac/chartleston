@@ -2,7 +2,7 @@ module Write (write) where
 
 import Duration (Duration, showNote)
 import Note     (Note, show')
-import Score    (Measure(measure, nRepeat), Score, title, score)
+import Score    (Measure (measure, nRepeat), Score, title, score)
 
 
 ------------------------
@@ -35,7 +35,7 @@ voices up down
 voice :: Int -> [(Duration, [Note])] -> String
 voice t = pretty . (map $ uncurry notes)
   where
-    pretty = concatMap (((replicate (t * 4) ' ') ++) . (++ "\n")) . (lines' "")
+    pretty = concatMap ((replicate (t * 4) ' ' ++) . (++ "\n")) . lines' ""
     lines' acc []                 = [acc]
     lines' ""  (x : xs)           = lines' x xs
     lines' acc l@(x : xs)
