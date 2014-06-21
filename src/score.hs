@@ -1,4 +1,4 @@
-module Score (Measure (..), Score (Score), title, score) where
+module Score (Measure (..), Score (..)) where
 
 import Duration (Duration)
 import Note     (Note)
