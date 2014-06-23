@@ -1,5 +1,7 @@
 module Note (Note, show', fromPair, isCymbal, isTom, flams) where
 
+import Control.Arrow (first)
+
 
 ---------------
 -- Constants --
@@ -14,7 +16,7 @@ threshold = 50
 -- Structures --
 ----------------
 
-data Note = Note (Int, Int) | Flam (Int)
+data Note = Note (Instrument, Int) | Flam (Instrument)
 
 data Velocity = Ghost | Regular | Accent deriving (Eq, Ord, Show)
 
@@ -34,42 +36,45 @@ instance Show Note where
 -- | Take a note and the lilypond representation of the duration.
 -- Return the lilypond representation of the note.
 show' :: Note -> String -> String
-show' x@(Note (p, _)) = let instr = instrument p in case velocity x of
+show' x@(Note (i, _)) = let instr = show i in case velocity x of
   Ghost   -> (("\\parenthesize " ++ instr) ++)
   Regular -> (instr ++)
   Accent  -> (instr ++) . (++ "->")
-show' (Flam p) = (("\\acciaccatura{\\once\\stemUp " ++ i ++ "8}" ++ i) ++)
-  where i = instrument p
+show' (Flam i) = (("\\acciaccatura{\\once\\stemUp " ++ i' ++ "8}" ++ i') ++)
+  where i' = show i
 
--- | Create a note from a pair (pitch, duration).
+-- | Create a note from a pair (pitch, velocity).
 fromPair :: (Int, Int) -> Note
-fromPair = Note
+fromPair = Note . first td15
 
 -- | Determine if a note is a cymbal.
 isCymbal :: Note -> Bool
-isCymbal = flip elem [26, 42, 46, 49, 51, 52, 53, 55, 57, 59] . pitch
+isCymbal = flip elem [CrashCymbal, HalfOpenHiHat, HiHat, OpenHiHat, RideBell,
+                      RideCymbal] . instrument
 
 -- | Determine if a note is a tom.
 isTom :: Note -> Bool
-isTom = flip elem [37, 38, 40, 41, 43, 45, 47, 48, 50] . pitch
+isTom = flip elem [CrossStick, FloorTom, HighTom, MidTom, Rimshot, Snare]
+        . instrument
 
 -- | Detect the flams in a list of simultaneous notes.
 flams :: [Note] -> [Note]
-flams (x@(Note (p, _)) : xs)
-  | p `elem` (map pitch xs) = Flam p : flams (filter ((/= p) . pitch) xs)
-  | otherwise               = x : flams xs
-flams (x : xs)              = x : flams xs
-flams x                     = x
+flams (x@(Note (i, _)) : xs)
+  | i `elem` (map instrument xs) = Flam i :
+                                   flams (filter ((/= i) . instrument) xs)
+  | otherwise                    = x : flams xs
+flams (x : xs)                   = x : flams xs
+flams x                          = x
 
 
 ---------------------
 -- Local functions --
 ---------------------
 
--- Get the pitch (i.e. the instrument) of a note.
-pitch :: Note -> Int
-pitch (Note (p, _)) = p
-pitch (Flam (p))    = p
+-- Get the instrument of a note.
+instrument :: Note -> Instrument
+instrument (Note (i, _)) = i
+instrument (Flam (i))    = i
 
 -- Get the velocity (i.e. the strength) of a note.
 velocity :: Note -> Velocity
@@ -78,54 +83,59 @@ velocity (Note (_, v)) | v > threshold = Regular
 velocity (Note (_, _))                 = Ghost
 velocity _                             = Regular
 
+
+data Instrument = BassDrum
+                | CrashCymbal
+                | CrossStick
+                | FloorTom
+                | HalfOpenHiHat
+                | HiHat
+                | HighTom
+                | MidTom
+                | OpenHiHat
+                | PedalHiHat
+                | RideBell
+                | RideCymbal
+                | Rimshot
+                | Snare
+                | Other deriving Eq
+
+instance Show Instrument where
+  show BassDrum      = "bd"
+  show CrashCymbal   = "cymc"
+  show CrossStick    = "sn" -- TODO
+  show FloorTom      = "tomfh"
+  show HalfOpenHiHat = "hhho"
+  show HiHat         = "hh"
+  show HighTom       = "tomh"
+  show MidTom        = "toml"
+  show OpenHiHat     = "hho"
+  show PedalHiHat    = "hhp"
+  show RideBell      = "rb"
+  show RideCymbal    = "cymr"
+  show Rimshot       = "sn" -- TODO
+  show Snare         = "sn"
+  show Other         = "ss" -- Dummy
+
 -- Convert a MIDI instrument (number) to its Lilypond value.
-instrument :: (Num a, Eq a) => a -> String
-instrument 35 = "bda"   -- Bass drum 2
-instrument 36 = "bd"    -- Bass Drum 1
-instrument 37 = "ss"    -- Side Stick/Rimshot
-instrument 38 = "sn"    -- Snare Drum 1
-instrument 39 = "hc"    -- Hand Clap
-instrument 40 = "sna"   -- Snare Drum 2
-instrument 41 = "tomfl" -- Low Tom 2
-instrument 42 = "hh"    -- Closed Hi-hat
-instrument 43 = "tomfh" -- Low Tom 1
-instrument 44 = "hhp"   -- Pedal Hi-hat
-instrument 45 = "tomml" -- Mid Tom 2
-instrument 46 = "hhho"  -- Open Hi-hat; TD15 half open
-instrument 47 = "toml"  -- Mid Tom 1
-instrument 48 = "tommh" -- High Tom 2
-instrument 49 = "cymc"  -- Crash Cymbal 1
-instrument 50 = "tomh"  -- High Tom 1
-instrument 51 = "cymr"  -- Ride Cymbal 1
-instrument 52 = "cymch" -- Chinese Cymbal
-instrument 53 = "rb"    -- Ride Bell
-instrument 54 = "tamb"  -- Tambourine
-instrument 55 = "cyms"  -- Splash Cymbal
-instrument 56 = "cb"    -- Cowbell
-instrument 57 = "cymca" -- Crash Cymbal 2
-instrument 58 = "vibs"  -- Vibra Slap
-instrument 59 = "cymra" -- Ride Cymbal 2
-instrument 60 = "boh"   -- High Bongo
-instrument 61 = "bol"   -- Low Bongo
-instrument 62 = "cghm"  -- Mute High Conga
-instrument 63 = "cgho"  -- Open High Conga
-instrument 64 = "cgl"   -- Low Conga
-instrument 65 = "timh"  -- High Timbale
-instrument 66 = "timl"  -- Low Timbale
-instrument 67 = "agh"   -- High Agogô
-instrument 68 = "agl"   -- Low Agogô
-instrument 69 = "cab"   -- Cabasa
-instrument 70 = "mar"   -- Maracas
-instrument 71 = "whs"   -- Short Whistle
-instrument 72 = "whl"   -- Long Whistle
-instrument 73 = "guis"  -- Short Güiro
-instrument 74 = "guil"  -- Long Güiro
-instrument 75 = "cl"    -- Claves
-instrument 76 = "wbh"   -- High Wood Block
-instrument 77 = "wbl"   -- Low Wood Block
-instrument 78 = "cuim"  -- Mute Cuíca
-instrument 79 = "cuio"  -- Open Cuíca
-instrument 80 = "trim"  -- Mute Triangle
-instrument 81 = "trio"  -- Open Triangle
-instrument 26 = "hho"   -- TD15 open hi-hat
-instrument _  = "tt" -- Phony; so that in case of error it can compile
+td15 :: (Num a, Eq a) => a -> Instrument
+td15 36 = BassDrum      -- Bass Drum 1
+td15 37 = CrossStick    -- Side Stick/Rimshot
+td15 38 = Snare         -- Snare Drum 1
+td15 40 = Rimshot       -- Snare Drum 2
+td15 42 = HiHat         -- Closed Hi-hat
+td15 43 = FloorTom      -- Low Tom 1
+td15 44 = PedalHiHat    -- Pedal Hi-hat
+td15 45 = MidTom        -- Mid Tom 2
+td15 46 = HalfOpenHiHat -- Open Hi-hat
+td15 47 = MidTom        -- Mid Tom 1 (TODO: this is rimshot)
+td15 48 = HighTom       -- High Tom 2
+td15 49 = CrashCymbal   -- Crash Cymbal 1
+td15 50 = HighTom       -- High Tom 1 (TODO: this is rimshot)
+td15 51 = RideCymbal    -- Ride Cymbal 1
+td15 53 = RideBell      -- Ride Bell
+td15 55 = CrashCymbal   -- Splash Cymbal (TODO: this is the edge)
+td15 58 = FloorTom      -- Vibra Slap (TODO: this is floor tom rimshot)
+td15 59 = RideCymbal    -- Ride Cymbal 2 (TODO: this is the edge)
+td15 26 = OpenHiHat     -- TD15 open hi-hat
+td15 _  = Other
