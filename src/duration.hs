@@ -13,7 +13,7 @@ import GHC.Exts      (sortWith)
 
 -- Number of simultaneous guesses for the detection.
 guesses :: Int
-guesses = 3
+guesses = 20
 
 ---------------
 -- Structure --
