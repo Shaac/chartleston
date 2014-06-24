@@ -55,7 +55,8 @@ removeRests = converge . (iterate $ aux (0 :: Rational))
     aux e ((t, x) : xs)   = (t, x) : (aux (add e t) xs)
     aux _ []              = []
     add e x               = toRational x + e
-    ok t e = if t' > denominator e then True else t' <= denominator (add e t)
+    ok t e = if toRational t >= 0.25 then False else
+      if t' > denominator e then True else t' <= denominator (add e t)
       where t' = denominator $ toRational t
 
 -- Regroup equal measures that are next to each other.
