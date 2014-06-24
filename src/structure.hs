@@ -6,14 +6,15 @@ import Data.Ratio    (denominator)
 
 import Duration (Duration, isNote)
 import Note     (Note, isCymbal, isTom, flams)
-import Score    (Measure (Measure))
+import Score    (Measures (..))
+
 
 ------------------------
 -- Exported functions --
 ------------------------
 
 -- | Get the structure of a notes list.
-structure :: [(Duration, [Note])] -> [Measure]
+structure :: [(Duration, [Note])] -> [(Measures, Int)]
 structure = repeats . map voices . measures . getFlams
 
 
@@ -62,10 +63,10 @@ removeRests = converge . (iterate $ aux (0 :: Rational))
       where t' = denominator $ toRational t
 
 -- Regroup equal measures that are next to each other.
-repeats :: [([(Duration, [Note])], [(Duration, [Note])])] -> [Measure]
+repeats :: [([(Duration, [Note])], [(Duration, [Note])])] -> [(Measures, Int)]
 repeats l = repeats' (head l) 1 (tail l)
   where
-    repeats' prev n [] = [Measure prev n]
+    repeats' prev n [] = [(Simple [prev], n)]
     repeats' prev n (x : xs)
       | x == prev     = repeats' prev (n + 1) xs
-      | otherwise     = Measure prev n : repeats' x 1 xs
+      | otherwise     = (Simple [prev], n) : repeats' x 1 xs
