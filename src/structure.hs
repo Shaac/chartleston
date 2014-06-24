@@ -5,7 +5,7 @@ import Data.List     (partition)
 import Data.Ratio    (denominator)
 
 import Duration (Duration, isNote)
-import Note     (Note, isCymbal, isTom, flams)
+import Note     (Note, isCymbal, isTom, flams, pedals)
 import Score    (Measures (..))
 
 
@@ -15,16 +15,12 @@ import Score    (Measures (..))
 
 -- | Get the structure of a notes list.
 structure :: [(Duration, [Note])] -> [(Measures, Int)]
-structure = repeats . map voices . measures . getFlams
+structure = repeats . map voices . measures . map (second $ pedals . flams)
 
 
 ---------------------
 -- Local functions --
 ---------------------
-
--- Set the flams as such.
-getFlams :: [(a, [Note])] -> [(a, [Note])]
-getFlams = map $ second flams
 
 -- Regroup the notes by measure.
 measures :: [(Duration, a)] -> [[(Duration, a)]]

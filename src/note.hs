@@ -1,4 +1,4 @@
-module Note (Note, show', fromPair, isCymbal, isTom, flams) where
+module Note (Note, show', fromPair, isCymbal, isTom, flams, pedals) where
 
 import Control.Arrow (first)
 
@@ -66,6 +66,10 @@ flams (x@(Note (i, _)) : xs)
 flams (x : xs)                   = x : flams xs
 flams x                          = x
 
+pedals :: [Note] -> [Note]
+pedals xs
+  | HiHat `elem` map instrument xs = filter ((/= PedalHiHat) . instrument) xs
+  | otherwise                      = xs
 
 ---------------------
 -- Local functions --
