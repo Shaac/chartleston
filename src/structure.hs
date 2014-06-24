@@ -64,15 +64,21 @@ removeRests = converge . (iterate $ aux (0 :: Rational))
 
 -- Regroup equal measures that are next to each other.
 repeats :: [([(Duration, [Note])], [(Duration, [Note])])] -> [(Measures, Int)]
-repeats = map (first Simple) . double . simple . map (\x -> ([x], 1))
+repeats = volta . map (first Simple) . double . simple . map (\x -> ([x], 1))
   where
     simple ((a, na) : t@((b, nb) : xs))
-      | a == b    = simple $ (a, na + nb) : xs
-      | otherwise = (a, na) : simple t
-    simple a      = a
+      | a == b           = simple $ (a, na + nb) : xs
+      | otherwise        = (a, na) : simple t
+    simple a             = a
     double ((a, 1) : (b, 1) : (c, 1) : (d, 1) : xs)
       | a == c && b == d = double $ (a ++ b, 2) : xs
     double (([a, b], na) : ([c], 1) : ([d], 1) : xs)
       | a == c && b == d = double $ ([a, b], na + 1) : xs
-    double (a : xs) = a : double xs
-    double []       = []
+    double (a : xs)      = a : double xs
+    double []            = []
+    volta ((Simple [a, b], n) : (Simple [c], 1) : (Simple [d], 1) : xs)
+      | a == c           = (Volta (a, b, d), n + 1) : volta xs
+    volta ((Simple [a], 1):(Simple [b], 1):(Simple [c], 1):(Simple [d], 1):xs)
+      | a == c           = (Volta (a, b, d), 2) : volta xs
+    volta (a : xs)       = a : volta xs
+    volta []             = []

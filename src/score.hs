@@ -31,5 +31,5 @@ showMeasures s (Simple l, n)        = "        \\repeat percent " ++
                                       ++ "        }\n"
 showMeasures s (Volta (m, e, a), n) = "        \\repeat volta " ++
                                       show n ++ "\n" ++ s m ++
-                                      "        \\alternative {\n" ++ s e
-                                      ++ s a ++ "        }\n"
+                                      "        \\alternative {{\n" ++ s e
+                                      ++ "}{" ++ s a ++ "        }}\n"
