@@ -86,7 +86,9 @@ prefix title' = unlines [
   "    \\set DrumStaff.drumStyleTable = #(alist->hash-table td15)",
   "    \\drummode {",
   "        \\compressFullBarRests",
-  "        \\override MultiMeasureRest #'expand-limit = #1"]
+  "        \\override MultiMeasureRest #'expand-limit = #1",
+  "        \\set countPercentRepeats = ##t",
+  "        \\set repeatCountVisibility = #(every-nth-repeat-count-visible 4)"]
 
 -- The end of the lilypond file.
 suffix :: String
