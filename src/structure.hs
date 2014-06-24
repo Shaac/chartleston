@@ -64,9 +64,9 @@ removeRests = converge . (iterate $ aux (0 :: Rational))
 
 -- Regroup equal measures that are next to each other.
 repeats :: [([(Duration, [Note])], [(Duration, [Note])])] -> [(Measures, Int)]
-repeats l = repeats' (head l) 1 (tail l)
+repeats = simple . map (\x -> (Simple [x], 1))
   where
-    repeats' prev n [] = [(Simple [prev], n)]
-    repeats' prev n (x : xs)
-      | x == prev     = repeats' prev (n + 1) xs
-      | otherwise     = (Simple [prev], n) : repeats' x 1 xs
+    simple ((a, na) : t@((b, nb) : xs))
+      | a == b    = simple $ (a, na + nb) : xs
+      | otherwise = (a, na) : simple t
+    simple a      = a

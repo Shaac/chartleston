@@ -22,6 +22,7 @@ type Measure = ([(Duration, [Note])], [(Duration, [Note])])
 
 data Measures = Simple [Measure]
               | Volta (Measure, Measure, Measure)
+              deriving Eq
 
 showMeasures :: (Measure -> String) -> (Measures, Int) -> String
 showMeasures s (Simple l, 1)        = concatMap s l
