@@ -27,7 +27,8 @@ data Measures = Simple [Measure]
 showMeasures :: (Measure -> String) -> (Measures, Int) -> String
 showMeasures s (Simple l, 1)        = concatMap s l
 showMeasures s (Simple l, n)        = "        \\repeat percent " ++
-                                      show n ++ "\n" ++ concatMap s l
+                                      show n ++ " {\n" ++ concatMap s l
+                                      ++ "        }\n"
 showMeasures s (Volta (m, e, a), n) = "        \\repeat volta " ++
                                       show n ++ "\n" ++ s m ++
                                       "        \\alternative {\n" ++ s e
