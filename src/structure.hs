@@ -49,13 +49,13 @@ removeRests = converge . (iterate $ aux (0 :: Rational))
   where
     converge (x : y : xs) = if x == y then x else converge $ y : xs
     converge _            = fail "This can not occure."
-    aux e ((t1, x) : (t2, []) : xs)
-      | isNote (t1 + t2) && ok t1 e = (t1 + t2, x) : aux (add (add e t1) t2) xs
+    aux e (n@(t1, x) : (t2, []) : xs)
+      | isNote (t1 + t2) && ok n e = (t1 + t2, x) : aux (add (add e t1) t2) xs
       | otherwise         = (t1, x) : (aux (add e t1) $ (t2, []) : xs)
     aux e ((t, x) : xs)   = (t, x) : (aux (add e t) xs)
     aux _ []              = []
     add e x               = toRational x + e
-    ok t e = if toRational t >= 0.25 then False else
+    ok (t, l) e = if not (null l) && toRational t >= 0.25 then False else
       if t' > denominator e then True else t' <= denominator (add e t)
       where t' = denominator $ toRational t
 
