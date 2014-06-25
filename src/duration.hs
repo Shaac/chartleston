@@ -213,7 +213,7 @@ matchTempo l = if null result then finish l else result
     finish        = id
     result        = mapMaybe remove l
     remove  xs    = liftM (aux xs) $ split (0 :: Rational) [] $ current xs
-    aux xs (a, b) = PossibleDurations (ok xs ++ a) (err' a + okErr xs) b
+    aux xs (a, b) = PossibleDurations (ok xs ++ a) (err' a + 2 * okErr xs) b
     split a acc xs
       | a == 0.25 = Just (reverse acc, xs)
       | a >  0.25 = if (duration $ value $ head acc) > (0.25 :: Rational)
