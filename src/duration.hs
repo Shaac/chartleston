@@ -63,7 +63,7 @@ instance Num Duration where
     | x + 1 == y = Basic x
     | otherwise  = Other $ duration a - duration b
   a@(Basic x) - b@(Dotted y)
-    | x + 1 == y = Basic $ y - 1
+    | x + 1 == y = Basic $ y + 1
     | otherwise  = Other $ duration a - duration b
   a@(Dotted x) - b@(Dotted y)
     | x + 1 == y = Dotted y
