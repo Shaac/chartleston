@@ -61,8 +61,9 @@ removeRests = converge . (iterate $ aux (0 :: Rational))
 
 -- Regroup equal measures that are next to each other.
 repeats :: [([(Duration, [Note])], [(Duration, [Note])])] -> [(Measures, Int)]
-repeats = volta . map (first Simple) . double . simple . map (\x -> ([x], 1))
+repeats = ds . volta . map (first Simple) . double . simple . map start
   where
+    start x = ([x], 1)
     simple ((a, na) : t@((b, nb) : xs))
       | a == b           = simple $ (a, na + nb) : xs
       | otherwise        = (a, na) : simple t
@@ -79,3 +80,13 @@ repeats = volta . map (first Simple) . double . simple . map (\x -> ([x], 1))
       | a == c           = (Volta (a, b, d), 2) : volta xs
     volta (a : xs)       = a : volta xs
     volta []             = []
+    ds []                = []
+    ds (x : xs) = case ds' [x] xs of
+      0 -> x : ds xs
+      n -> uncurry (:) $ first (DalSegno &&& const 1) $ splitAt n $ drop (n - 1) xs
+    ds' _ [] = 0
+    ds' h xs
+      | null b                               = 0
+      | all (\x -> fst x == snd x) (zip a b) = length a
+      | otherwise                            = ds' a b
+      where (a, b) = first (h ++) $ span (/= head h) xs

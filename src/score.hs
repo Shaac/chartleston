@@ -22,6 +22,7 @@ type Measure = ([(Duration, [Note])], [(Duration, [Note])])
 
 data Measures = Simple [Measure]
               | Volta (Measure, Measure, Measure)
+              | DalSegno [(Measures, Int)]
               deriving Eq
 
 showMeasures :: (Measure -> String) -> (Measures, Int) -> String
@@ -33,3 +34,8 @@ showMeasures s (Volta (m, e, a), n) = "        \\repeat volta " ++
                                       show n ++ "\n" ++ s m ++
                                       "        \\alternative {{\n" ++ s e
                                       ++ "}{" ++ s a ++ "        }}\n"
+showMeasures s (DalSegno m, _)      = "        \\mark \\markup { \\musicglyph"
+                                      ++ "#\"scripts.segno\" }\n" ++
+                                      concatMap (showMeasures s) m ++
+                                      "        \\mark \\markup { \\musicglyph"
+                                      ++ "#\"scripts.segno\" }\n"
