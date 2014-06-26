@@ -15,6 +15,11 @@ import GHC.Exts      (sortWith)
 guesses :: Int
 guesses = 20
 
+-- Coefficient used to amplify the error in old detected measures.
+-- Should be greater than 1 to move on to the current measure.
+old :: Rational
+old = 1.1
+
 ---------------
 -- Structure --
 ---------------
@@ -213,7 +218,7 @@ matchTempo l = if null result then finish l else result
     finish        = id
     result        = mapMaybe remove l
     remove  xs    = liftM (aux xs) $ split (0 :: Rational) [] $ current xs
-    aux xs (a, b) = PossibleDurations (ok xs ++ a) (err' a + 2 * okErr xs) b
+    aux xs (a, b) = PossibleDurations (ok xs ++ a) (err' a + old * okErr xs) b
     split a acc xs
       | a == 0.25 = Just (reverse acc, xs)
       | a >  0.25 = if (duration $ value $ head acc) > (0.25 :: Rational)
