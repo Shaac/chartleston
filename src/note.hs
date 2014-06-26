@@ -141,5 +141,6 @@ td15 53 = RideBell      -- Ride Bell
 td15 55 = CrashCymbal   -- Splash Cymbal (TODO: this is the edge)
 td15 58 = FloorTom      -- Vibra Slap (TODO: this is floor tom rimshot)
 td15 59 = RideCymbal    -- Ride Cymbal 2 (TODO: this is the edge)
+td15 22 = HiHat         -- TD15 closed hi-hat
 td15 26 = OpenHiHat     -- TD15 open hi-hat
 td15 _  = Other
