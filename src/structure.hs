@@ -75,9 +75,11 @@ repeats = ds . volta . map (first Simple) . double . simple . map start
     double (a : xs)      = a : double xs
     double []            = []
     volta ((Simple [a, b], n) : (Simple [c], 1) : (Simple [d], 1) : xs)
-      | a == c           = (Volta (a, b, d), n + 1) : volta xs
+      | a == c           = volta $ (Volta (a, [b, d]), n + 1) : xs
     volta ((Simple [a], 1):(Simple [b], 1):(Simple [c], 1):(Simple [d], 1):xs)
-      | a == c           = (Volta (a, b, d), 2) : volta xs
+      | a == c           = volta $ (Volta (a, [b, d]), 2) : xs
+    volta ((Volta (a, b), n) : (Simple [c], 1) : (Simple [d], 1) : xs)
+      | a == c           = volta $ (Volta (a, b ++ [d]), n + 1) : xs
     volta (a : xs)       = a : volta xs
     volta []             = []
     ds []                = []

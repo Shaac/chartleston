@@ -21,21 +21,23 @@ instance Functor Score where
 type Measure = ([(Duration, [Note])], [(Duration, [Note])])
 
 data Measures = Simple [Measure]
-              | Volta (Measure, Measure, Measure)
+              | Volta (Measure, [Measure])
               | DalSegno [(Measures, Int)]
               deriving Eq
 
 showMeasures :: (Measure -> String) -> (Measures, Int) -> String
-showMeasures s (Simple l, 1)        = concatMap s l
-showMeasures s (Simple l, n)        = "        \\repeat percent " ++
-                                      show n ++ " {\n" ++ concatMap s l
-                                      ++ "        }\n"
-showMeasures s (Volta (m, e, a), n) = "        \\repeat volta " ++
-                                      show n ++ "\n" ++ s m ++
-                                      "        \\alternative {{\n" ++ s e
-                                      ++ "}{" ++ s a ++ "        }}\n"
-showMeasures s (DalSegno m, _)      = "        \\mark \\markup { \\musicglyph"
-                                      ++ "#\"scripts.segno\" }\n" ++
-                                      concatMap (showMeasures s) m ++
-                                      "        \\mark \\markup { \\musicglyph"
-                                      ++ "#\"scripts.segno\" }\n"
+showMeasures s (Simple l, 1)     = concatMap s l
+showMeasures s (Simple l, n)     = "        \\repeat percent " ++
+                                   show n ++ " {\n" ++ concatMap s l
+                                   ++ "        }\n"
+showMeasures s (Volta (m, l), n) = "        \\repeat volta " ++
+                                   show n ++ "\n" ++ s m ++
+                                   "        \\alternative {\n" ++
+                                   concatMap (("            {" ++) .
+                                   (++ "            }\n") . s) l ++
+                                   "        }\n"
+showMeasures s (DalSegno m, _)   = "        \\mark \\markup { \\musicglyph"
+                                   ++ "#\"scripts.segno\" }\n" ++
+                                   concatMap (showMeasures s) m ++
+                                   "        \\mark \\markup { \\musicglyph"
+                                   ++ "#\"scripts.segno\" }\n"
