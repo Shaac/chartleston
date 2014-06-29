@@ -235,6 +235,6 @@ duration (Other  x) = fromRational x
 
 -- Return the Lilypond suffix corresponding to the duration.
 lilypond :: Duration -> String
-lilypond (Basic  x) = show $ (2 :: Integer) ^ (max x 0) -- TODO: x < 0
+lilypond (Basic  x) = show $ (2 :: Integer) ^ (max x 0)
 lilypond (Dotted x) = lilypond (Basic x) ++ "."
 lilypond (Other  _) = "0"
