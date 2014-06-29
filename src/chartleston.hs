@@ -17,8 +17,9 @@ main :: IO ()
 main = do
   args <- getArgs
   midi <- open $ args !! 0
-  let title = name args
-  writeFile (title ++ ".ly") $
+  let filename = name args
+  let title    = if null (arg args "t") then filename else arg args "t"
+  writeFile (filename ++ ".ly") $
     write $ fmap structure $ fmap analyse $ Score title midi
 
 
