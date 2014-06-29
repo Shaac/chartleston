@@ -85,7 +85,8 @@ repeats = ds . volta . map (first Simple) . double . simple . map start
     ds []                = []
     ds (x : xs) = case ds' [x] xs of
       0 -> x : ds xs
-      n -> uncurry (:) $ first (DalSegno &&& const 1) $ splitAt n $ drop (n - 1) xs
+      n -> uncurry (:) $
+           first (DalSegno &&& const 1) $ splitAt n $ drop (n - 1) xs
     ds' _ [] = 0
     ds' h xs
       | null b                               = 0
