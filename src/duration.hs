@@ -105,7 +105,7 @@ instance Enum Duration where
   fromEnum (Dotted x)
     | x < 4     = fromInteger $ x * 2 - 1
     | otherwise = error "Such small dotted can not be an Enum."
-  fromEnum _          = error "Other can not be an Enum."
+  fromEnum _    = error "Other can not be an Enum."
 
 -- A duration is longer or shorter than an other.
 instance Ord Duration where
