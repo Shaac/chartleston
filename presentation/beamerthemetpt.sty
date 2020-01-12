@@ -1,0 +1,136 @@
+\mode<presentation>
+\usepackage[utf8]{inputenc}
+
+\usepackage[absolute,overlay]{textpos}
+
+\useoutertheme{split}
+
+\definecolor{redbox}  {RGB}{191, 18,  56}
+\definecolor{blackbox}{RGB}{0,   0,   0}
+\definecolor{brownbox}{RGB}{128, 99,  90}
+
+\setlength{\TPHorizModule}{1mm}
+\setlength{\TPVertModule}{1mm}
+
+\usepackage{tikz}
+\usetikzlibrary{decorations.pathreplacing,calc}
+\usetikzlibrary{arrows,shapes,snakes,automata,backgrounds,petri}
+\usepackage{scalefnt}
+
+\tikzstyle{mybox} = [draw=redbox, fill=redbox!20, very thick,
+rectangle, rounded corners, inner sep=10pt, inner ysep=20pt]
+\tikzstyle{fancytitle} =[fill=redbox, text=white, rectangle]
+
+
+
+\setbeamercolor{frametitle}         {fg = redbox}
+\setbeamercolor{itemize item}       {fg = redbox}
+\setbeamercolor{structure}          {fg = redbox, bg = red}
+\setbeamercolor{block title}        {fg = white,  bg = brownbox}
+\setbeamercolor{block title example}{fg = white,  bg = black}
+\setbeamercolor{block title alerted}{fg = white,  bg = redbox}
+\setbeamercolor{block body  alerted}{fg = black,  bg = brownbox!0} % TODO
+\setbeamercolor{palette primary}    {fg = black,  bg = white}
+\setbeamercolor{palette secondary}  {use=structure,fg=structure.fg!100!white}
+\setbeamercolor{palette tertiary}   {use=structure,fg=structure.fg!100!white}
+\setbeamercolor*{palette quaternary}{fg=black,bg=white} % outline on top left
+\setbeamercolor{background canvas}  {bg=white, fg=black}
+\setbeamercolor{redbox}  {fg = white, bg=redbox}
+\setbeamercolor{blackbox}{fg = white, bg=blackbox}
+\setbeamercolor{brownbox}{fg = white, bg=brownbox}
+
+
+% First  frame
+\newcommand{\RectanglesOfMainSlide}{%
+    \raisebox{0mm}[0pt][0pt]{%
+        \begin{pgfpicture}{0mm}{0mm}{0mm}{0mm}
+            \pgfsetlinewidth{5mm}
+            \color{redbox}
+            \pgfline{\pgfpoint{-4mm}{-12mm}}{\pgfpoint{24mm}{-12mm}}
+            \color{blackbox}
+            \pgfline{\pgfpoint{24mm}{-12mm}}{\pgfpoint{52mm}{-12mm}}
+            \color{brownbox}
+            \pgfline{\pgfpoint{52mm}{-12mm}}{\pgfpoint{80mm}{-12mm}}
+\end{pgfpicture}}}
+
+
+\setbeamertemplate{title page}{
+    \begin{columns}[c]
+        \column{3cm}
+        \vspace{-2cm}\\
+        \includegraphics[width=2.5cm]{figures/tpt}
+        \\Institut\\ Mines-Télécom
+        \column{7cm}
+        \vspace{1cm}\\
+        \LARGE{\textbf{\inserttitle}}\\
+        \vspace{0.5cm}
+        \normalsize{\insertauthor}\\
+        \vspace{0.5cm}
+        \normalsize{\insertdate}\\
+        \vspace{-1cm}
+        \RectanglesOfMainSlide
+    \end{columns}
+}
+
+
+% Frames decoration
+
+
+\setbeamertemplate{frametitle}{
+    \begin{columns}[t]
+        \column{16mm}
+        \raisebox{0mm}[0pt][0pt]{%
+            \begin{pgfpicture}{0mm}{0mm}{0mm}{0mm}
+                \pgfsetlinewidth{5mm}
+                \color{redbox}
+                \pgfline{\pgfpoint{-2mm}{2.2mm}}{\pgfpoint{4mm}{2.2mm}}
+                \color{blackbox}
+                \pgfline{\pgfpoint{4mm}{2.2mm}}{\pgfpoint{10mm}{2.2mm}}
+                \color{brownbox}
+                \pgfline{\pgfpoint{10mm}{2.2mm}}{\pgfpoint{16mm}{2.2mm}}
+        \end{pgfpicture}}
+        \column{10.7cm}
+        \strut\textbf{\insertframetitle}\strut
+    \end{columns}
+}
+
+\setbeamertemplate{footline}{
+    \ifnum \insertpagenumber=1
+    \begin{beamercolorbox}[ht=2.25ex]{}
+    \end{beamercolorbox}
+    \else
+    \usebeamerfont{structure}
+    \begin{textblock}{14}(117.8,86)
+        \includegraphics[width=1cm]{figures/tpt}
+    \end{textblock}
+    \leavevmode
+    \begin{beamercolorbox}[wd=0.7cm,ht=2.25ex,dp=1ex,left,leftskip=1pt]{redbox}
+        \insertframenumber/\inserttotalframenumber
+    \end{beamercolorbox}%
+    \hspace{-1pt}%
+    \begin{beamercolorbox}[wd=1.3cm,ht=2.25ex,dp=1ex,right,rightskip=1pt]{redbox}
+        \insertdate
+    \end{beamercolorbox}
+    \begin{beamercolorbox}[wd=3.5cm,ht=2.25ex,dp=1ex,center]{blackbox}
+        Institut Mines-Télécom
+    \end{beamercolorbox}
+    \begin{beamercolorbox}[wd=6.25cm,ht=2.25ex,dp=1ex,center]{brownbox}
+        \insertshorttitle
+    \end{beamercolorbox}
+    \fi
+}
+
+\setbeamertemplate{navigation symbols}{}
+
+\setbeamertemplate{blocks}[rounded][shadow=true]
+
+% To show the outline at the beginning of each section
+\AtBeginSection[]{
+    \begin{frame}
+        \frametitle{Plan}
+        \tableofcontents[currentsection,hideothersubsections]
+    \end{frame}
+}
+
+\mode
+<all>
